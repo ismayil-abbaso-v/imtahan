@@ -142,12 +142,12 @@ elif menu == "📝 İmtahan Rejimi":
                     else:
                         shuffled = st.session_state[f"shuffled_{idx}"]
 
-                    st.markdown(f"**{idx+1}) {qtext}**")
+                    st.markdown(f"{idx+1}) {qtext}")
                     selected = st.radio("Variant seç:", shuffled, key=f"answer_{idx}")
 
                     col1, col2, col3 = st.columns(3)
                     with col1:
-                        if st.button("⬅️ Əvvəlki", disabled=idx == 0):
+                        if st.button("⬅ Əvvəlki", disabled=idx == 0):
                             st.session_state.current -= 1
                             st.rerun()
                     with col2:
@@ -155,7 +155,7 @@ elif menu == "📝 İmtahan Rejimi":
                             st.session_state.current = len(st.session_state.questions)
                             st.rerun()
                     with col3:
-                        if st.button("➡️ Növbəti", disabled=(selected is None)):
+                        if st.button("➡ Növbəti", disabled=(selected is None)):
                             if len(st.session_state.answers) <= idx:
                                 st.session_state.answers.append(selected)
                                 st.session_state.correct_answers.append(correct)
@@ -172,7 +172,7 @@ elif menu == "📝 İmtahan Rejimi":
                     with st.expander("📋 Detallı nəticə"):
                         for i, (ua, ca, q) in enumerate(zip(st.session_state.answers, st.session_state.correct_answers, st.session_state.questions)):
                             status = "✅ Düzgün" if ua == ca else "❌ Səhv"
-                            st.markdown(f"**{i+1}) {q[0]}**\nSənin cavabın: `{ua}` — Doğru: `{ca}` → {status}")
+                            st.markdown(f"{i+1}) {q[0]}\nSənin cavabın: {ua} — Doğru: {ca} → {status}")
 
                     if st.button("🔁 Yenidən başla"):
                         for key in list(st.session_state.keys()):
