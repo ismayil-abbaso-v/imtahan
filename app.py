@@ -1,24 +1,111 @@
+import streamlit as st
+import re
+import random
+from docx import Document
+from io import BytesIO
+from datetime import datetime, timedelta
+
+st.set_page_config(page_title="Test Qarışdırıcı və İmtahan Rejimi", page_icon="📄")
+
+# --- Riyazi ifadələri də daxil oxumaq üçün paragraph'ın tam mətni ---
+def full_text(paragraph):
+    return ''.join(run.text for run in paragraph.runs).strip()
+
+# --- Sual və variantları ayıran funksiyası ---
+def parse_docx(file):
+    doc = Document(file)
+    question_pattern = re.compile(r"^\s*\d+[\.\)]\s+")
+    option_pattern = re.compile(r"^\s*[A-Ea-e]\)\s+(.*)")
+
+    paragraphs = list(doc.paragraphs)
+    i = 0
+    question_blocks = []
+
+    while i < len(paragraphs):
+        text = full_text(paragraphs[i])
+        if question_pattern.match(text):
+            question_text = question_pattern.sub('', text)
+            i += 1
+            options = []
+            while i < len(paragraphs):
+                text = full_text(paragraphs[i])
+                match = option_pattern.match(text)
+                if match:
+                    options.append(match.group(1).strip())
+                    i += 1
+                elif text and not question_pattern.match(text) and len(options) < 5:
+                    options.append(text)
+                    i += 1
+                else:
+                    break
+            if len(options) == 5:
+                question_blocks.append((question_text, options))
+        else:
+            i += 1
+    return question_blocks
+
+# --- Variantları qarışdır və cavab siyahısı çıxar ---
+def create_shuffled_docx_and_answers(suallar):
+    yeni_doc = Document()
+    cavablar = []
+
+    for idx, (sual_metni, variantlar) in enumerate(suallar, start=1):
+        yeni_doc.add_paragraph(f"{idx}) {sual_metni}")
+        dogru_cavab_mətni = variantlar[0]
+        random.shuffle(variantlar)
+
+        for j, variant in enumerate(variantlar):
+            herf = chr(ord('A') + j)
+            yeni_doc.add_paragraph(f"{herf}) {variant}")
+            if variant.strip() == dogru_cavab_mətni.strip():
+                cavablar.append(f"{idx}) {herf}")
+
+    return yeni_doc, cavablar
+
+# --- İstifadəçi interfeysi ---
+menu = st.sidebar.radio("Seçim et:", ["📤 Variantları Qarışdır", "📝 İmtahan Rejimi"])
+
+if menu == "📤 Variantları Qarışdır":
+    st.title("📤 Sual Variantlarını Qarışdır")
+    uploaded_file = st.file_uploader("Word (.docx) sənədini seç", type="docx")
+    mode = st.radio("Rejim:", ["50 sual", "Bütün suallar"], index=0)
+
+    if uploaded_file:
+        suallar = parse_docx(uploaded_file)
+        if len(suallar) < 5:
+            st.error("Faylda kifayət qədər uyğun sual tapılmadı.")
+        else:
+            secilmis = random.sample(suallar, min(50, len(suallar))) if mode == "50 sual" else suallar
+            yeni_doc, cavablar = create_shuffled_docx_and_answers(secilmis)
+
+            output_docx = BytesIO()
+            yeni_doc.save(output_docx)
+            output_docx.seek(0)
+
+            output_answers = BytesIO()
+            output_answers.write('\\n'.join(cavablar).encode('utf-8'))
+            output_answers.seek(0)
+
+            st.success("✅ Sənədlər hazırdır!")
+            st.download_button("📥 Qarışdırılmış suallar (.docx)", output_docx, "qarisdirilmis_suallar.docx")
+            st.download_button("📥 Cavab açarı (.txt)", output_answers, "cavablar.txt")
+
 elif menu == "📝 İmtahan Rejimi":
     st.title("📝 Öz İmtahanını Yoxla")
     uploaded_file = st.file_uploader("📤 Word (.docx) faylını yüklə", type="docx")
+    mode = st.radio("📌 Rejim seç:", ["50 random sual", "Bütün suallar"], index=0)
 
     if uploaded_file:
         questions = parse_docx(uploaded_file)
-        total_questions = len(questions)
-
         if not questions:
             st.error("Sual tapılmadı.")
         else:
-            st.markdown(f"*Fayldakı ümumi sual sayı:* {total_questions}")
-
-            start_idx = st.number_input("Başlanğıc sual nömrəsi:", min_value=1, max_value=total_questions, value=1)
-            end_idx = st.number_input("Sonuncu sual nömrəsi:", min_value=start_idx, max_value=total_questions, value=min(start_idx+49, total_questions))
-
-            selected_questions = questions[start_idx-1:end_idx]
+            if mode == "50 random sual":
+                questions = random.sample(questions, min(50, len(questions)))
 
             if "started" not in st.session_state:
                 st.session_state.started = False
-                st.session_state.questions = selected_questions
+                st.session_state.questions = questions
                 st.session_state.current = 0
                 st.session_state.answers = []
                 st.session_state.correct_answers = []
