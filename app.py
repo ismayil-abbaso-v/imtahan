@@ -171,7 +171,7 @@ elif menu == "📝 İmtahan Rejimi":
 
                     with st.expander("📋 Detallı nəticə"):
                         for i, (ua, ca, q) in enumerate(zip(st.session_state.answers, st.session_state.correct_answers, st.session_state.questions)):
-                            status = \"✅ Düzgün\" if ua == ca else \"❌ Səhv\"
+                            status = "✅ Düzgün" if ua == ca else "❌ Səhv"
                             st.markdown(f\"**{i+1}) {q[0]}**\\nSənin cavabın: `{ua}` — Doğru: `{ca}` → {status}\")
 
                     if st.button(\"🔁 Yenidən başla\"):
