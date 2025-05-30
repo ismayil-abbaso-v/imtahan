@@ -14,8 +14,8 @@ def full_text(paragraph):
 # --- Sual və variantları ayıran funksiyası ---
 def parse_docx(file):
     doc = Document(file)
-    question_pattern = re.compile(r"^\\s*\\d+[\\.\\)]\\s+")
-    option_pattern = re.compile(r"^\\s*[A-Ea-e]\\)\\s+(.*)")
+    question_pattern = re.compile(r"^\s*\d+[\.\)]\s+")
+    option_pattern = re.compile(r"^\s*[A-Ea-e]\)\s+(.*)")
 
     paragraphs = list(doc.paragraphs)
     i = 0
