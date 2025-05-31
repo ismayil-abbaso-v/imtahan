@@ -65,7 +65,7 @@ if "page" not in st.session_state:
 
 # 🏠 Ana səhifə
 if st.session_state.page == "home":
-    st.title("📝 Testləri Qarışdır, Biliklərini Yoxla!")
+    st.title("📝 Testləri Qarışdır və Biliklərini Yoxla!")
     st.markdown("Zəhmət olmasa bir rejim seçin:")
 
     col1, col2 = st.columns(2)
@@ -89,7 +89,7 @@ else:
         st.rerun()
 
     # Sol menyuda görünən rejim dəyişdirici (istəyə bağlı)
-    menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 İmtahan Rejimi"],
+    menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et"],
                             index=0 if st.session_state.page == "shuffle" else 1)
     if menu == "🎲 Sualları Qarışdır":
         st.session_state.page = "shuffle"
