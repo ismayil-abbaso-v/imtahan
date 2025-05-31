@@ -50,9 +50,10 @@ def create_shuffled_docx_and_answers(questions):
     for idx, (question, options) in enumerate(questions, start=1):
         new_doc.add_paragraph(f"{idx}) {question}")
         correct_answer = options[0]
-        random.shuffle(options)
+        shuffled_options = options[:]
+        random.shuffle(shuffled_options)
 
-        for j, option in enumerate(options):
+        for j, option in enumerate(shuffled_options):
             letter = chr(ord('A') + j)
             new_doc.add_paragraph(f"{letter}) {option}")
             if option.strip() == correct_answer.strip():
@@ -72,11 +73,11 @@ if st.session_state.page == "home":
     with col1:
         if st.button("📝 Özünü imtahan et "):
             st.session_state.page = "exam"
-            st.rerun()
+            st.experimental_rerun()
     with col2:
         if st.button("🎲 Sualları Qarışdır"):
             st.session_state.page = "shuffle"
-            st.rerun()
+            st.experimental_rerun()
 
 # 📋 Əsas menyu və funksiya səhifələri
 else:
@@ -86,7 +87,7 @@ else:
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.session_state.page = "home"
-        st.rerun()
+        st.experimental_rerun()
 
     # Sol menyuda görünən rejim dəyişdirici (istəyə bağlı)
     menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et"],
@@ -140,8 +141,8 @@ else:
                     st.session_state.started = False
                     st.session_state.questions = questions
                     st.session_state.current = 0
-                    st.session_state.answers = []
-                    st.session_state.correct_answers = []
+                    st.session_state.answers = [None] * len(questions)
+                    st.session_state.correct_answers = [q[1][0] for q in questions]  # Doğru cavab hər zaman ilk seçim
                     st.session_state.start_time = None
                     st.session_state.timer_expired = False
 
@@ -150,7 +151,7 @@ else:
                     if st.button("🚀 Başla"):
                         st.session_state.started = True
                         st.session_state.start_time = datetime.now()
-                        st.rerun()
+                        st.experimental_rerun()
 
                 elif st.session_state.started:
                     now = datetime.now()
@@ -177,37 +178,43 @@ else:
                         else:
                             shuffled = st.session_state[f"shuffled_{idx}"]
 
-                        st.progress((idx / total))
+                        st.progress((idx + 1) / total)
                         st.markdown(f"**{idx+1}) {qtext}**")
-                        selected = st.radio("📌 Cavab seçin:", shuffled, key=f"answer_{idx}")
+                        selected = st.radio("📌 Cavab seçin:", shuffled, index=0 if st.session_state.answers[idx] is None else shuffled.index(st.session_state.answers[idx]), key=f"answer_{idx}")
 
                         col1, col2, col3 = st.columns(3)
                         with col1:
-                            if st.button("⬅️ Əvvəlki", disabled=idx == 0):
-                                st.session_state.current -= 1
-                                st.rerun()
+                            if idx > 0:
+                                if st.button("⬅️ Əvvəlki"):
+                                    st.session_state.current -= 1
+                                    st.experimental_rerun()
+                            else:
+                                st.write("")  # boş yer
+
                         with col2:
                             if st.button("🚩 Bitir"):
+                                # Cavabı yadda saxla
+                                st.session_state.answers[idx] = selected
                                 st.session_state.current = len(st.session_state.questions)
-                                st.rerun()
+                                st.experimental_rerun()
+
                         with col3:
-                            if st.button("➡️ Növbəti", disabled=(selected is None)):
-                                if len(st.session_state.answers) <= idx:
-                                    st.session_state.answers.append(selected)
-                                    st.session_state.correct_answers.append(correct)
-                                else:
+                            if st.button("➡️ Növbəti"):
+                                if selected is not None:
                                     st.session_state.answers[idx] = selected
-                                    st.session_state.correct_answers[idx] = correct
-                                st.session_state.current += 1
-                                st.rerun()
+                                    st.session_state.current += 1
+                                    st.experimental_rerun()
+                                else:
+                                    st.warning("❗ Zəhmət olmasa cavab seçin.")
+
                     else:
                         st.success("🎉 İmtahan tamamlandı!")
                         score = sum(1 for a, b in zip(st.session_state.answers, st.session_state.correct_answers) if a == b)
                         total = len(st.session_state.questions)
-                        percent = (score / total) * 100
+                        percent = (score / total) * 100 if total > 0 else 0
                         st.markdown(f"### ✅ Nəticə: {score} düzgün cavab / {total} sual")
                         st.markdown(f"<p style='font-size:16px;'>📈 Doğruluq faizi: <strong>{percent:.2f}%</strong></p>", unsafe_allow_html=True)
-                        st.progress(score / total)
+                        st.progress(score / total if total > 0 else 0)
 
                         with st.expander("📊 Detallı nəticələr"):
                             for i, (ua, ca, q) in enumerate(zip(st.session_state.answers, st.session_state.correct_answers, st.session_state.questions)):
@@ -218,4 +225,4 @@ else:
                             for key in list(st.session_state.keys()):
                                 del st.session_state[key]
                             st.session_state.page = "home"
-                            st.rerun()
+                            st.experimental_rerun()
