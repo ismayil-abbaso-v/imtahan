@@ -89,7 +89,7 @@ else:
         st.rerun()
 
     # Sol menyuda görünən rejim dəyişdirici (istəyə bağlı)
-    menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır"],
+    menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et"],
                             index=0 if st.session_state.page == "shuffle" else 1)
     if menu == "🎲 Sualları Qarışdır":
         st.session_state.page = "shuffle"
