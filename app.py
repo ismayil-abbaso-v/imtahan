@@ -65,7 +65,7 @@ if "page" not in st.session_state:
 
 # 🏠 Ana səhifə
 if st.session_state.page == "home":
-    st.title("📝 İmtahan Hazırlayıcıya Xoş Gəldin Testləri Qarışdır və Biliklərini Yoxla!")
+    st.title("📝 Testləri Qarışdır, Biliklərini Yoxla!")
     st.markdown("Zəhmət olmasa bir rejim seçin:")
 
     col1, col2 = st.columns(2)
