@@ -65,12 +65,12 @@ if "page" not in st.session_state:
 
 # 🏠 Ana səhifə
 if st.session_state.page == "home":
- st.title("📝 İmtahan Hazırlayıcıya Xoş Gəldin Testləri Qarışdır və Biliklərini Yoxla!")
+    st.title("📝 İmtahan Hazırlayıcıya Xoş Gəldiniz")
     st.markdown("Zəhmət olmasa bir rejim seçin:")
 
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("📝 Özünü İmtahan Et "):
+        if st.button("📝 İmtahan Rejimi"):
             st.session_state.page = "exam"
             st.rerun()
     with col2:
@@ -219,10 +219,6 @@ else:
                                 del st.session_state[key]
                             st.session_state.page = "home"
                             st.rerun()
-
-
-
-
 import streamlit as st
 import re
 import random
