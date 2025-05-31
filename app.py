@@ -64,11 +64,6 @@ def create_shuffled_docx_and_answers(questions):
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
-def reset_state():
-    keys = list(st.session_state.keys())
-    for key in keys:
-        del st.session_state[key]
-
 # 🏠 Ana səhifə
 if st.session_state.page == "home":
     st.title("📝 Testləri Qarışdır, Biliklərini Yoxla!")
@@ -76,13 +71,11 @@ if st.session_state.page == "home":
 
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("📝 Özünü İmtahan Et"):
-            reset_state()
+        if st.button("📝 Özünü İmtahan Et "):
             st.session_state.page = "exam"
             st.experimental_rerun()
     with col2:
         if st.button("🎲 Sualları Qarışdır"):
-            reset_state()
             st.session_state.page = "shuffle"
             st.experimental_rerun()
 
@@ -91,23 +84,25 @@ else:
     # 🔙 Ana səhifəyə qayıt düyməsi
     st.sidebar.title("🔧 Menyu")
     if st.sidebar.button("🏠 Ana Səhifəyə Qayıt"):
-        reset_state()
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
         st.session_state.page = "home"
         st.experimental_rerun()
 
     # Sol menyuda görünən rejim dəyişdirici (istəyə bağlı)
+    # Burada sadəcə page dəyişəcək, amma fayl yükləmələr və seçimlər səhifə dəyişməyəcək
     menu = st.sidebar.radio(
         "➡️ Rejimi dəyiş:",
         ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et"],
         index=0 if st.session_state.page == "shuffle" else 1
     )
-    if menu == "🎲 Sualları Qarışdır" and st.session_state.page != "shuffle":
-        reset_state()
-        st.session_state.page = "shuffle"
-        st.experimental_rerun()
-    elif menu == "📝 Özünü İmtahan Et" and st.session_state.page != "exam":
-        reset_state()
-        st.session_state.page = "exam"
+    # Page-ni sadəcə radio seçimindən dəyişirik, fayl yükləməsi və sual sayı seçimi dəyişmə zamanı dəyişmir
+    if menu != st.session_state.page:
+        st.session_state.page = menu
+        # Səhifə dəyişdikdə bütün imtahan və sual yaddaşlarını silirik
+        keys_to_clear = [k for k in st.session_state.keys() if k not in ["page"]]
+        for k in keys_to_clear:
+            del st.session_state[k]
         st.experimental_rerun()
 
     # 1️⃣ Sualları qarışdır
@@ -147,18 +142,22 @@ else:
             if not questions:
                 st.error("❗ Heç bir sual tapılmadı.")
             else:
-                selected = questions
-                if "50" in mode:
-                    selected = random.sample(questions, min(50, len(questions)))
-
-                if "started" not in st.session_state:
-                    st.session_state.started = False
-                    st.session_state.questions = selected
+                # Fayl və rejim seçimi dəyişdikdə sessiya suallarını yenilə
+                # DİQQƏT: Burada page dəyişmir, sadəcə st.session_state-də suallar yenilənir
+                if ("questions" not in st.session_state) or (st.session_state.get("uploaded_file_id", None) != uploaded_file.name) or (st.session_state.get("mode", None) != mode):
+                    st.session_state.questions = questions
+                    if "50" in mode:
+                        st.session_state.questions = random.sample(questions, min(50, len(questions)))
+                    else:
+                        st.session_state.questions = questions
                     st.session_state.current = 0
                     st.session_state.answers = []
                     st.session_state.correct_answers = []
+                    st.session_state.started = False
                     st.session_state.start_time = None
                     st.session_state.timer_expired = False
+                    st.session_state.uploaded_file_id = uploaded_file.name
+                    st.session_state.mode = mode
 
                 if not st.session_state.started:
                     st.info("📌 60 dəqiqə vaxtınız olacaq. Hazırsınızsa başlayın!")
@@ -192,9 +191,9 @@ else:
                         else:
                             shuffled = st.session_state[f"shuffled_{idx}"]
 
-                        st.progress((idx + 1) / total)
+                        st.progress((idx / total))
                         st.markdown(f"**{idx+1}) {qtext}**")
-                        selected_option = st.radio("📌 Cavab seçin:", shuffled, key=f"answer_{idx}")
+                        selected = st.radio("📌 Cavab seçin:", shuffled, key=f"answer_{idx}")
 
                         col1, col2, col3 = st.columns(3)
                         with col1:
@@ -206,25 +205,23 @@ else:
                                 st.session_state.current = len(st.session_state.questions)
                                 st.experimental_rerun()
                         with col3:
-                            if st.button("➡️ Növbəti", disabled=(selected_option is None)):
-                                # Cavabı yadda saxla
+                            if st.button("➡️ Növbəti", disabled=(selected is None)):
                                 if len(st.session_state.answers) <= idx:
-                                    st.session_state.answers.append(selected_option)
+                                    st.session_state.answers.append(selected)
                                     st.session_state.correct_answers.append(correct)
                                 else:
-                                    st.session_state.answers[idx] = selected_option
+                                    st.session_state.answers[idx] = selected
                                     st.session_state.correct_answers[idx] = correct
                                 st.session_state.current += 1
                                 st.experimental_rerun()
                     else:
-                        # İmtahan bitdi
                         st.success("🎉 İmtahan tamamlandı!")
                         score = sum(1 for a, b in zip(st.session_state.answers, st.session_state.correct_answers) if a == b)
                         total = len(st.session_state.questions)
-                        percent = (score / total) * 100 if total > 0 else 0
+                        percent = (score / total) * 100
                         st.markdown(f"### ✅ Nəticə: {score} düzgün cavab / {total} sual")
                         st.markdown(f"<p style='font-size:16px;'>📈 Doğruluq faizi: <strong>{percent:.2f}%</strong></p>", unsafe_allow_html=True)
-                        st.progress(score / total if total > 0 else 0)
+                        st.progress(score / total)
 
                         with st.expander("📊 Detallı nəticələr"):
                             for i, (ua, ca, q) in enumerate(zip(st.session_state.answers, st.session_state.correct_answers, st.session_state.questions)):
@@ -232,7 +229,7 @@ else:
                                 st.markdown(f"**{i+1}) {q[0]}**\n• Sənin cavabın: `{ua}`\n• Doğru cavab: `{ca}` → {status}")
 
                         if st.button("🔁 Yenidən Başla"):
-                            reset_state()
+                            for key in list(st.session_state.keys()):
+                                del st.session_state[key]
                             st.session_state.page = "home"
                             st.experimental_rerun()
-
