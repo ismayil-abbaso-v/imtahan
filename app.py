@@ -1,3 +1,4 @@
+
 import streamlit as st
 import re
 import random
@@ -7,11 +8,9 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="Test Qarışdırıcı və İmtahan Rejimi", page_icon="📄")
 
-# --- Riyazi ifadələri də daxil oxumaq üçün paragraph'ın tam mətni ---
 def full_text(paragraph):
     return ''.join(run.text for run in paragraph.runs).strip()
 
-# --- Sual və variantları ayıran funksiyası ---
 def parse_docx(file):
     doc = Document(file)
     question_pattern = re.compile(r"^\s*\d+[\.\)]\s+")
@@ -44,7 +43,6 @@ def parse_docx(file):
             i += 1
     return question_blocks
 
-# --- Variantları qarışdır və cavab siyahısı çıxar ---
 def create_shuffled_docx_and_answers(suallar):
     yeni_doc = Document()
     cavablar = []
@@ -62,7 +60,6 @@ def create_shuffled_docx_and_answers(suallar):
 
     return yeni_doc, cavablar
 
-# --- İstifadəçi interfeysi ---
 menu = st.sidebar.radio("Seçim et:", ["📤 Variantları Qarışdır", "📝 İmtahan Rejimi"])
 
 if menu == "📤 Variantları Qarışdır":
@@ -83,7 +80,7 @@ if menu == "📤 Variantları Qarışdır":
             output_docx.seek(0)
 
             output_answers = BytesIO()
-            output_answers.write('\\n'.join(cavablar).encode('utf-8'))
+            output_answers.write('\n'.join(cavablar).encode('utf-8'))
             output_answers.seek(0)
 
             st.success("✅ Sənədlər hazırdır!")
@@ -102,6 +99,12 @@ elif menu == "📝 İmtahan Rejimi":
         else:
             if mode == "50 random sual":
                 questions = random.sample(questions, min(50, len(questions)))
+            else:
+                toplam = len(questions)
+                st.info(f"Sual sayı: {toplam}")
+                start = st.number_input("📍 İlk sual nömrəsi", min_value=1, max_value=toplam, value=1)
+                end = st.number_input("📍 Son sual nömrəsi", min_value=start, max_value=toplam, value=min(start+49, toplam))
+                questions = questions[start-1:end]
 
             if "started" not in st.session_state:
                 st.session_state.started = False
@@ -142,12 +145,12 @@ elif menu == "📝 İmtahan Rejimi":
                     else:
                         shuffled = st.session_state[f"shuffled_{idx}"]
 
-                    st.markdown(f"{idx+1}) {qtext}")
+                    st.markdown(f"**{idx+1}) {qtext}**")
                     selected = st.radio("Variant seç:", shuffled, key=f"answer_{idx}")
 
                     col1, col2, col3 = st.columns(3)
                     with col1:
-                        if st.button("⬅ Əvvəlki", disabled=idx == 0):
+                        if st.button("⬅️ Əvvəlki", disabled=idx == 0):
                             st.session_state.current -= 1
                             st.rerun()
                     with col2:
@@ -155,7 +158,7 @@ elif menu == "📝 İmtahan Rejimi":
                             st.session_state.current = len(st.session_state.questions)
                             st.rerun()
                     with col3:
-                        if st.button("➡ Növbəti", disabled=(selected is None)):
+                        if st.button("➡️ Növbəti", disabled=(selected is None)):
                             if len(st.session_state.answers) <= idx:
                                 st.session_state.answers.append(selected)
                                 st.session_state.correct_answers.append(correct)
@@ -172,7 +175,7 @@ elif menu == "📝 İmtahan Rejimi":
                     with st.expander("📋 Detallı nəticə"):
                         for i, (ua, ca, q) in enumerate(zip(st.session_state.answers, st.session_state.correct_answers, st.session_state.questions)):
                             status = "✅ Düzgün" if ua == ca else "❌ Səhv"
-                            st.markdown(f"{i+1}) {q[0]}\nSənin cavabın: {ua} — Doğru: {ca} → {status}")
+                            st.markdown(f"**{i+1}) {q[0]}**\nSənin cavabın: `{ua}` — Doğru: `{ca}` → {status}")
 
                     if st.button("🔁 Yenidən başla"):
                         for key in list(st.session_state.keys()):
