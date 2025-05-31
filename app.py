@@ -5,14 +5,11 @@ from docx import Document
 from io import BytesIO
 from datetime import datetime, timedelta
 
-# Səhifə parametrləri
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="🧠")
 
-# Paragraph-dan tam mətni oxumaq üçün funksiya
 def full_text(paragraph):
     return ''.join(run.text for run in paragraph.runs).strip()
 
-# Word sənədindən sualları və variantları çıxaran funksiya
 def parse_docx(file):
     doc = Document(file)
     question_pattern = re.compile(r"^\s*\d+[\.\)]\s+")
@@ -45,7 +42,6 @@ def parse_docx(file):
             i += 1
     return question_blocks
 
-# Sualları qarışdırıb cavab açarını çıxaran funksiya
 def create_shuffled_docx_and_answers(questions):
     new_doc = Document()
     answer_key = []
@@ -136,7 +132,8 @@ elif menu == "📝 İmtahan Rejimi":
                     st.info(f"⏳ Qalan vaxt: {mins} dəq {secs} san")
 
                 idx = st.session_state.current
-                if idx < len(st.session_state.questions):
+                total = len(st.session_state.questions)
+                if idx < total:
                     qtext, options = st.session_state.questions[idx]
                     correct = options[0]
                     if f"shuffled_{idx}" not in st.session_state:
@@ -145,6 +142,9 @@ elif menu == "📝 İmtahan Rejimi":
                         st.session_state[f"shuffled_{idx}"] = shuffled
                     else:
                         shuffled = st.session_state[f"shuffled_{idx}"]
+
+                    # Proqres çubuğu
+                    st.progress((idx / total))
 
                     st.markdown(f"**{idx+1}) {qtext}**")
                     selected = st.radio("📌 Cavab seçin:", shuffled, key=f"answer_{idx}")
@@ -171,7 +171,11 @@ elif menu == "📝 İmtahan Rejimi":
                 else:
                     st.success("🎉 İmtahan tamamlandı!")
                     score = sum(1 for a, b in zip(st.session_state.answers, st.session_state.correct_answers) if a == b)
-                    st.markdown(f"### ✅ Nəticə: {score} düzgün cavab / {len(st.session_state.questions)} sual")
+                    total = len(st.session_state.questions)
+                    percent = (score / total) * 100
+                    st.markdown(f"### ✅ Nəticə: {score} düzgün cavab / {total} sual")
+                    st.markdown(f"### 📈 Doğruluq faizi: **{percent:.2f}%**")
+                    st.progress(score / total)
 
                     with st.expander("📊 Detallı nəticələr"):
                         for i, (ua, ca, q) in enumerate(zip(st.session_state.answers, st.session_state.correct_answers, st.session_state.questions)):
