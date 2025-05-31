@@ -219,7 +219,3 @@ else:
                                 del st.session_state[key]
                             st.session_state.page = "home"
                             st.rerun()
-
-
-
-bu kod uzerinde deyisiklik et ve tam kodu mene gonder
