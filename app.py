@@ -1,4 +1,3 @@
-
 import streamlit as st
 import re
 import random
@@ -64,11 +63,11 @@ if menu == "📝 İmtahan Rejimi":
                     start = st.number_input("İlk sual №", 1, toplam, value=1, step=1)
                 with col2:
                     end = st.number_input("Son sual №", start, toplam, value=min(start+49, toplam), step=1)
-                questions = questions[start-1:end]  # ardıcıl aralıq
+                questions = questions[start-1:end] # doğru yerdə dəyişilir
 
             if "started" not in st.session_state:
                 st.session_state.started = False
-                st.session_state.questions = questions
+                st.session_state.questions = questions # ⬅️ BURADA artıq düz sual siyahısı təyin olunur
                 st.session_state.current = 0
                 st.session_state.answers = []
                 st.session_state.correct_answers = []
