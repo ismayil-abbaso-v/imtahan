@@ -5,7 +5,7 @@ from docx import Document
 from io import BytesIO
 from datetime import datetime, timedelta
 
-st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
+st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="🧠")
 
 def full_text(paragraph):
     return ''.join(run.text for run in paragraph.runs).strip()
