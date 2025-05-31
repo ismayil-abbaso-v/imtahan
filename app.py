@@ -43,51 +43,9 @@ def parse_docx(file):
             i += 1
     return question_blocks
 
-def create_shuffled_docx_and_answers(suallar):
-    yeni_doc = Document()
-    cavablar = []
-
-    for idx, (sual_metni, variantlar) in enumerate(suallar, start=1):
-        yeni_doc.add_paragraph(f"{idx}) {sual_metni}")
-        dogru_cavab_mətni = variantlar[0]
-        random.shuffle(variantlar)
-
-        for j, variant in enumerate(variantlar):
-            herf = chr(ord('A') + j)
-            yeni_doc.add_paragraph(f"{herf}) {variant}")
-            if variant.strip() == dogru_cavab_mətni.strip():
-                cavablar.append(f"{idx}) {herf}")
-
-    return yeni_doc, cavablar
-
 menu = st.sidebar.radio("Seçim et:", ["📤 Variantları Qarışdır", "📝 İmtahan Rejimi"])
 
-if menu == "📤 Variantları Qarışdır":
-    st.title("📤 Sual Variantlarını Qarışdır")
-    uploaded_file = st.file_uploader("Word (.docx) sənədini seç", type="docx")
-    mode = st.radio("Rejim:", ["50 sual", "Bütün suallar"], index=0)
-
-    if uploaded_file:
-        suallar = parse_docx(uploaded_file)
-        if len(suallar) < 5:
-            st.error("Faylda kifayət qədər uyğun sual tapılmadı.")
-        else:
-            secilmis = random.sample(suallar, min(50, len(suallar))) if mode == "50 sual" else suallar
-            yeni_doc, cavablar = create_shuffled_docx_and_answers(secilmis)
-
-            output_docx = BytesIO()
-            yeni_doc.save(output_docx)
-            output_docx.seek(0)
-
-            output_answers = BytesIO()
-            output_answers.write('\n'.join(cavablar).encode('utf-8'))
-            output_answers.seek(0)
-
-            st.success("✅ Sənədlər hazırdır!")
-            st.download_button("📥 Qarışdırılmış suallar (.docx)", output_docx, "qarisdirilmis_suallar.docx")
-            st.download_button("📥 Cavab açarı (.txt)", output_answers, "cavablar.txt")
-
-elif menu == "📝 İmtahan Rejimi":
+if menu == "📝 İmtahan Rejimi":
     st.title("📝 Öz İmtahanını Yoxla")
     uploaded_file = st.file_uploader("📤 Word (.docx) faylını yüklə", type="docx")
     mode = st.radio("📌 Rejim seç:", ["50 random sual", "Bütün suallar"], index=0)
@@ -101,10 +59,12 @@ elif menu == "📝 İmtahan Rejimi":
                 questions = random.sample(questions, min(50, len(questions)))
             else:
                 toplam = len(questions)
-                st.info(f"Sual sayı: {toplam}")
-                start = st.number_input("📍 İlk sual nömrəsi", min_value=1, max_value=toplam, value=1)
-                end = st.number_input("📍 Son sual nömrəsi", min_value=start, max_value=toplam, value=min(start+49, toplam))
-                questions = questions[start-1:end]
+                col1, col2 = st.columns(2)
+                with col1:
+                    start = st.number_input("İlk sual №", 1, toplam, value=1, step=1)
+                with col2:
+                    end = st.number_input("Son sual №", start, toplam, value=min(start+49, toplam), step=1)
+                questions = questions[start-1:end]  # ardıcıl aralıq
 
             if "started" not in st.session_state:
                 st.session_state.started = False
