@@ -204,3 +204,28 @@ elif menu == "📝 İmtahan Rejimi":
                 st.progress(score / total)
 
                 with st.expander("📊 Detallı nəticələr"):
+                    for i, (question, options) in enumerate(st.session_state.questions):
+                        user_ans = st.session_state.answers[i]
+                        correct_ans = st.session_state.correct_answers[i]
+                        status = "✅" if user_ans == correct_ans else "❌"
+                        st.markdown(f"{i+1}) {question}")
+                        st.markdown(f"- Sizin cavabınız: {user_ans if user_ans else 'Seçilməyib'}")
+                        st.markdown(f"- Düzgün cavab: {correct_ans}")
+                        st.markdown(f"- Nəticə: {status}")
+                        st.write("---")
+
+                # Səhv cavabları yenidən sınamaq üçün düymə
+                wrong_questions = []
+                for i, (ans, correct) in enumerate(zip(st.session_state.answers, st.session_state.correct_answers)):
+                    if ans != correct:
+                        wrong_questions.append(st.session_state.questions[i])
+
+                if wrong_questions:
+                    if st.button("🔄 Səhv cavabları yenidən sınayın"):
+                        st.session_state.retry_questions = wrong_questions
+                        st.session_state.retry_mode = True
+                        initialize_exam(wrong_questions)
+                        st.experimental_rerun()
+
+                else:
+                    st.info("🎉 Bütün suallara düzgün cavab verdiniz!")
