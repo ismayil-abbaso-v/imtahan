@@ -5,7 +5,7 @@ from docx import Document
 from io import BytesIO
 from datetime import datetime, timedelta
 
-st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="🧠")
+st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
 def full_text(paragraph):
     return ''.join(run.text for run in paragraph.runs).strip()
@@ -58,9 +58,11 @@ def create_shuffled_docx_and_answers(questions):
                 answer_key.append(f"{idx}) {letter}")
     return new_doc, answer_key
 
+# --- İstifadəçi interfeysi ---
 st.sidebar.title("🔧 Menyu")
-menu = st.sidebar.radio("➡️ Rejim seçin:", ["🎲 Sualları Qarışdır", "📝 İmtahan Rejimi"])
+menu = st.sidebar.radio("➡️ Zəhmət olmasa rejim seçin:", ["🎲 Sualları Qarışdır", "📝 İmtahan Rejimi"])
 
+# 1️⃣ Sualları qarışdırma rejimi
 if menu == "🎲 Sualları Qarışdır":
     st.title("🎲 Test Suallarını Qarışdır və Cavab Açarı Yarat")
     uploaded_file = st.file_uploader("📤 Word (.docx) sənədini seçin", type="docx")
@@ -86,6 +88,7 @@ if menu == "🎲 Sualları Qarışdır":
             st.download_button("📥 Qarışdırılmış Suallar (.docx)", output_docx, "qarisdirilmis_suallar.docx")
             st.download_button("📥 Cavab Açarı (.txt)", output_answers, "cavab_acari.txt")
 
+# 2️⃣ İmtahan rejimi
 elif menu == "📝 İmtahan Rejimi":
     st.title("📝 Özünü Sına: İmtahan Rejimi")
     uploaded_file = st.file_uploader("📤 İmtahan üçün Word (.docx) faylını seçin", type="docx")
@@ -103,7 +106,7 @@ elif menu == "📝 İmtahan Rejimi":
                 st.session_state.started = False
                 st.session_state.questions = questions
                 st.session_state.current = 0
-                st.session_state.answers = [None] * len(questions) # cavablar None ilə başlanır
+                st.session_state.answers = []
                 st.session_state.correct_answers = []
                 st.session_state.start_time = None
                 st.session_state.timer_expired = False
@@ -113,7 +116,7 @@ elif menu == "📝 İmtahan Rejimi":
                 if st.button("🚀 Başla"):
                     st.session_state.started = True
                     st.session_state.start_time = datetime.now()
-                    st.experimental_rerun()
+                    st.rerun()
 
             elif st.session_state.started:
                 now = datetime.now()
@@ -129,7 +132,8 @@ elif menu == "📝 İmtahan Rejimi":
                     st.info(f"⏳ Qalan vaxt: {mins} dəq {secs} san")
 
                 idx = st.session_state.current
-                if idx < len(st.session_state.questions):
+                total = len(st.session_state.questions)
+                if idx < total:
                     qtext, options = st.session_state.questions[idx]
                     correct = options[0]
                     if f"shuffled_{idx}" not in st.session_state:
@@ -139,50 +143,46 @@ elif menu == "📝 İmtahan Rejimi":
                     else:
                         shuffled = st.session_state[f"shuffled_{idx}"]
 
-                    # Selectbox üçün variantlar: ilk element "Cavab verilməyib"
-                    select_options = ["Cavab verilməyib"] + shuffled
+                    # Proqres çubuğu
+                    st.progress((idx / total))
 
-                    prev_answer = st.session_state.answers[idx]
-                    if prev_answer is None:
-                        default_index = 0
-                    else:
-                        try:
-                            default_index = select_options.index(prev_answer)
-                        except ValueError:
-                            default_index = 0
-
-                    chosen = st.selectbox(f"**{idx+1}) {qtext}**", select_options, index=default_index, key=f"answer_{idx}")
-
-                    # "Cavab verilməyib" seçilsə None kimi saxla
-                    if chosen == "Cavab verilməyib":
-                        st.session_state.answers[idx] = None
-                    else:
-                        st.session_state.answers[idx] = chosen
-
-                    st.session_state.correct_answers = [q[1][0] for q in st.session_state.questions]
+                    st.markdown(f"**{idx+1}) {qtext}**")
+                    selected = st.radio("📌 Cavab seçin:", shuffled, key=f"answer_{idx}")
 
                     col1, col2, col3 = st.columns(3)
                     with col1:
                         if st.button("⬅️ Əvvəlki", disabled=idx == 0):
                             st.session_state.current -= 1
-                            st.experimental_rerun()
+                            st.rerun()
                     with col2:
                         if st.button("🚩 Bitir"):
                             st.session_state.current = len(st.session_state.questions)
-                            st.experimental_rerun()
+                            st.rerun()
                     with col3:
-                        if st.button("➡️ Növbəti"):
+                        if st.button("➡️ Növbəti", disabled=(selected is None)):
+                            if len(st.session_state.answers) <= idx:
+                                st.session_state.answers.append(selected)
+                                st.session_state.correct_answers.append(correct)
+                            else:
+                                st.session_state.answers[idx] = selected
+                                st.session_state.correct_answers[idx] = correct
                             st.session_state.current += 1
-                            st.experimental_rerun()
-
+                            st.rerun()
                 else:
                     st.success("🎉 İmtahan tamamlandı!")
-                    score = sum(
-                        1
-                        for user_ans, correct_ans in zip(st.session_state.answers, st.session_state.correct_answers)
-                        if user_ans is not None and user_ans == correct_ans
-                    )
+                    score = sum(1 for a, b in zip(st.session_state.answers, st.session_state.correct_answers) if a == b)
                     total = len(st.session_state.questions)
-                    percent = round((score / total) * 100, 2) if total else 0
-                    st.write(f"✅ Düzgün cavablar: {score} / {total}")
-                    st.write(f"📊 Doğruluq faizi: {percent}%")
+                    percent = (score / total) * 100
+                    st.markdown(f"### ✅ Nəticə: {score} düzgün cavab / {total} sual")
+                    st.markdown(f"<p style='font-size:16px;'>📈 Doğruluq faizi: <strong>{percent:.2f}%</strong></p>", unsafe_allow_html=True)
+                    st.progress(score / total)
+
+                    with st.expander("📊 Detallı nəticələr"):
+                        for i, (ua, ca, q) in enumerate(zip(st.session_state.answers, st.session_state.correct_answers, st.session_state.questions)):
+                            status = "✅ Düzgün" if ua == ca else "❌ Səhv"
+                            st.markdown(f"**{i+1}) {q[0]}**\n• Sənin cavabın: `{ua}`\n• Doğru cavab: `{ca}` → {status}")
+
+                    if st.button("🔁 Yenidən Başla"):
+                        for key in list(st.session_state.keys()):
+                            del st.session_state[key]
+                        st.rerun()
