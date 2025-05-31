@@ -4,7 +4,6 @@ import random
 from docx import Document
 from io import BytesIO
 from datetime import datetime, timedelta
-import streamlit.components.v1 as components  # JS üçün lazım
 
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
@@ -148,16 +147,16 @@ else:
 
                 if not st.session_state.started:
                     st.info("📌 60 dəqiqə vaxtınız olacaq. Hazırsınızsa başlayın!")
+
                     if st.button("🚀 Başla"):
                         st.session_state.started = True
                         st.session_state.start_time = datetime.now()
                         st.experimental_rerun()
 
-                if st.session_state.get("started", False):
-                    # Səhifəni avtomatik aşağı sürüşdürmək üçün JS əlavə
-                    components.html("""
+                    # Scroll funksiyası üçün JS kodu
+                    st.components.v1.html("""
                         <script>
-                        window.scrollTo(0, 1000);
+                            window.scrollTo({top: 600, behavior: 'smooth'});
                         </script>
                     """, height=0)
 
@@ -210,7 +209,6 @@ else:
                                 st.session_state.current += 1
                                 st.experimental_rerun()
                     else:
-                        st.success("✅ İmtahan tamamlandı!")
-                        correct_count = sum([1 for a, c in zip(st.session_state.answers, st.session_state.correct_answers) if a == c])
-                        st.write(f"**Doğru cavablar:** {correct_count} / {len(st.session_state.questions)}")
-                        # Burada istəsən nəticələri saxlamaq və ya göstərmək olar
+                        st.success("🎉 İmtahan tamamlandı!")
+                        score = sum(1 for a, b in zip(st.session_state.answers, st.session_state.correct_answers) if a == b)
+                        total = len(st.session_state
