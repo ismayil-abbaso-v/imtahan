@@ -174,7 +174,7 @@ elif menu == "📝 İmtahan Rejimi":
                     total = len(st.session_state.questions)
                     percent = (score / total) * 100
                     st.markdown(f"### ✅ Nəticə: {score} düzgün cavab / {total} sual")
-                    st.markdown(f"### 📈 Doğruluq faizi: **{percent:.2f}%**")
+                    st.markdown(f"<p style='font-size:16px;'>📈 Doğruluq faizi: <strong>{percent:.2f}%</strong></p>", unsafe_allow_html=True)
                     st.progress(score / total)
 
                     with st.expander("📊 Detallı nəticələr"):
