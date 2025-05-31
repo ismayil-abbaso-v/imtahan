@@ -102,12 +102,16 @@ elif menu == "📝 İmtahan Rejimi":
             if "50" in mode:
                 questions = random.sample(questions, min(50, len(questions)))
 
+            # Yanlış cavablarla yenidən imtahan üçün xüsusi açar yoxdursa, əsas imtahan rejimi başlayır
+            if "exam_mode" not in st.session_state:
+                st.session_state.exam_mode = "main" # "main" və ya "retry"
+
             if "started" not in st.session_state:
                 st.session_state.started = False
                 st.session_state.questions = questions
                 st.session_state.current = 0
                 st.session_state.answers = []
-                st.session_state.correct_answers = []
+                st.session_state.correct_answers = [opts[0] for _, opts in questions]
                 st.session_state.start_time = None
                 st.session_state.timer_expired = False
 
@@ -162,7 +166,7 @@ elif menu == "📝 İmtahan Rejimi":
                         if st.button("➡️ Növbəti", disabled=(selected is None)):
                             if len(st.session_state.answers) <= idx:
                                 st.session_state.answers.append(selected)
-                                st.session_state.correct_answers.append(correct)
+                                st.session_state.correct_answers[idx] = correct
                             else:
                                 st.session_state.answers[idx] = selected
                                 st.session_state.correct_answers[idx] = correct
@@ -172,17 +176,24 @@ elif menu == "📝 İmtahan Rejimi":
                     st.success("🎉 İmtahan tamamlandı!")
                     score = sum(1 for a, b in zip(st.session_state.answers, st.session_state.correct_answers) if a == b)
                     total = len(st.session_state.questions)
-                    percent = (score / total) * 100
+                    percent = (score / total) * 100 if total > 0 else 0
                     st.markdown(f"### ✅ Nəticə: {score} düzgün cavab / {total} sual")
-                    st.markdown(f"<p style='font-size:16px;'>📈 Doğruluq faizi: <strong>{percent:.2f}%</strong></p>", unsafe_allow_html=True)
-                    st.progress(score / total)
+                    st.markdown(f"### 📈 Doğruluq faizi: **{percent:.2f}%**")
+                    st.progress(score / total if total > 0 else 0)
 
                     with st.expander("📊 Detallı nəticələr"):
                         for i, (ua, ca, q) in enumerate(zip(st.session_state.answers, st.session_state.correct_answers, st.session_state.questions)):
                             status = "✅ Düzgün" if ua == ca else "❌ Səhv"
                             st.markdown(f"**{i+1}) {q[0]}**\n• Sənin cavabın: `{ua}`\n• Doğru cavab: `{ca}` → {status}")
 
-                    if st.button("🔁 Yenidən Başla"):
-                        for key in list(st.session_state.keys()):
-                            del st.session_state[key]
-                        st.rerun()
+                    # Yanlış cavab verilən sualları ayırırıq
+                    wrong_questions = [
+                        (q, opts)
+                        for i, (ua, ca, (q, opts)) in enumerate(zip(st.session_state.answers, st.session_state.correct_answers, st.session_state.questions))
+                        if ua != ca
+                    ]
+
+                    # Yanlış cavab verilən suallar varsa, yenidən imtahan düyməsi göstəririk
+                    if wrong_questions and st.session_state.exam_mode == "main":
+                        if st.button("🔄 Yanlış cavablandırılan sualları yenidən sınayın"):
+                            #
