@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
+# Util funksiyalar
 def full_text(paragraph):
     return ''.join(run.text for run in paragraph.runs).strip()
 
@@ -14,11 +15,9 @@ def parse_docx(file):
     doc = Document(file)
     question_pattern = re.compile(r"^\s*\d+[\.\)]\s+")
     option_pattern = re.compile(r"^\s*[A-Ea-e]\)\s+(.*)")
-
     paragraphs = list(doc.paragraphs)
     i = 0
     question_blocks = []
-
     while i < len(paragraphs):
         text = full_text(paragraphs[i])
         if question_pattern.match(text):
@@ -45,12 +44,10 @@ def parse_docx(file):
 def create_shuffled_docx_and_answers(questions):
     new_doc = Document()
     answer_key = []
-
     for idx, (question, options) in enumerate(questions, start=1):
         new_doc.add_paragraph(f"{idx}) {question}")
         correct_answer = options[0]
         random.shuffle(options)
-
         for j, option in enumerate(options):
             letter = chr(ord('A') + j)
             new_doc.add_paragraph(f"{letter}) {option}")
@@ -58,13 +55,31 @@ def create_shuffled_docx_and_answers(questions):
                 answer_key.append(f"{idx}) {letter}")
     return new_doc, answer_key
 
-# --- İstifadəçi interfeysi ---
-st.sidebar.title("🔧 Menyu")
-menu = st.sidebar.radio("➡️ Zəhmət olmasa rejim seçin:", ["🎲 Sualları Qarışdır", "📝 İmtahan Rejimi"])
+# --- Yönləndirmə üçün session_state istifadə ---
+if "page" not in st.session_state:
+    st.session_state.page = "home"
 
-# 1️⃣ Sualları qarışdırma rejimi
-if menu == "🎲 Sualları Qarışdır":
+# Ana səhifə
+if st.session_state.page == "home":
+    st.title("📝 İmtahan Hazırlayıcı Platforması")
+    st.markdown("Bu platforma ilə test suallarınızı qarışdıra və ya özünüzü imtahan rejimində sına bilərsiniz.")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🎲 Sualları Qarışdır"):
+            st.session_state.page = "shuffle"
+            st.rerun()
+    with col2:
+        if st.button("📝 İmtahan Rejimi"):
+            st.session_state.page = "exam"
+            st.rerun()
+
+# Sual Qarışdırma Rejimi
+elif st.session_state.page == "shuffle":
     st.title("🎲 Test Suallarını Qarışdır və Cavab Açarı Yarat")
+    if st.button("🏠 Əsas Səhifəyə Qayıt"):
+        st.session_state.page = "home"
+        st.rerun()
+
     uploaded_file = st.file_uploader("📤 Word (.docx) sənədini seçin", type="docx")
     mode = st.radio("💡 Sualların sayı:", ["🔹 50 təsadüfi sual", "🔸 Bütün suallar"], index=0)
 
@@ -75,11 +90,9 @@ if menu == "🎲 Sualları Qarışdır":
         else:
             selected = random.sample(questions, min(50, len(questions))) if "50" in mode else questions
             new_doc, answer_key = create_shuffled_docx_and_answers(selected)
-
             output_docx = BytesIO()
             new_doc.save(output_docx)
             output_docx.seek(0)
-
             output_answers = BytesIO()
             output_answers.write('\n'.join(answer_key).encode('utf-8'))
             output_answers.seek(0)
@@ -88,9 +101,13 @@ if menu == "🎲 Sualları Qarışdır":
             st.download_button("📥 Qarışdırılmış Suallar (.docx)", output_docx, "qarisdirilmis_suallar.docx")
             st.download_button("📥 Cavab Açarı (.txt)", output_answers, "cavab_acari.txt")
 
-# 2️⃣ İmtahan rejimi
-elif menu == "📝 İmtahan Rejimi":
+# İmtahan Rejimi
+elif st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi")
+    if st.button("🏠 Əsas Səhifəyə Qayıt"):
+        st.session_state.page = "home"
+        st.rerun()
+
     uploaded_file = st.file_uploader("📤 İmtahan üçün Word (.docx) faylını seçin", type="docx")
     mode = st.radio("📌 Sual seçimi:", ["🔹 50 təsadüfi sual", "🔸 Bütün suallar"], index=0)
 
@@ -143,9 +160,7 @@ elif menu == "📝 İmtahan Rejimi":
                     else:
                         shuffled = st.session_state[f"shuffled_{idx}"]
 
-                    # Proqres çubuğu
                     st.progress((idx / total))
-
                     st.markdown(f"**{idx+1}) {qtext}**")
                     selected = st.radio("📌 Cavab seçin:", shuffled, key=f"answer_{idx}")
 
@@ -171,7 +186,6 @@ elif menu == "📝 İmtahan Rejimi":
                 else:
                     st.success("🎉 İmtahan tamamlandı!")
                     score = sum(1 for a, b in zip(st.session_state.answers, st.session_state.correct_answers) if a == b)
-                    total = len(st.session_state.questions)
                     percent = (score / total) * 100
                     st.markdown(f"### ✅ Nəticə: {score} düzgün cavab / {total} sual")
                     st.markdown(f"<p style='font-size:16px;'>📈 Doğruluq faizi: <strong>{percent:.2f}%</strong></p>", unsafe_allow_html=True)
