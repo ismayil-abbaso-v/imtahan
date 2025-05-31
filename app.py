@@ -83,7 +83,7 @@ if menu == "📤 Variantları Qarışdır":
             output_docx.seek(0)
 
             output_answers = BytesIO()
-            output_answers.write('\\n'.join(cavablar).encode('utf-8'))
+            output_answers.write('\n'.join(cavablar).encode('utf-8'))
             output_answers.seek(0)
 
             st.success("✅ Sənədlər hazırdır!")
