@@ -4,6 +4,7 @@ import random
 from docx import Document
 from io import BytesIO
 from datetime import datetime, timedelta
+import streamlit.components.v1 as components  # JS üçün lazım
 
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
@@ -72,11 +73,11 @@ if st.session_state.page == "home":
     with col1:
         if st.button("📝 Özünü imtahan et "):
             st.session_state.page = "exam"
-            st.rerun()
+            st.experimental_rerun()
     with col2:
         if st.button("🎲 Sualları Qarışdır"):
             st.session_state.page = "shuffle"
-            st.rerun()
+            st.experimental_rerun()
 
 # 📋 Əsas menyu və funksiya səhifələri
 else:
@@ -86,7 +87,7 @@ else:
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.session_state.page = "home"
-        st.rerun()
+        st.experimental_rerun()
 
     # Sol menyuda görünən rejim dəyişdirici (istəyə bağlı)
     menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et"],
@@ -150,7 +151,15 @@ else:
                     if st.button("🚀 Başla"):
                         st.session_state.started = True
                         st.session_state.start_time = datetime.now()
-                        st.rerun()
+                        st.experimental_rerun()
+
+                if st.session_state.get("started", False):
+                    # Səhifəni avtomatik aşağı sürüşdürmək üçün JS əlavə
+                    components.html("""
+                        <script>
+                        window.scrollTo(0, 1000);
+                        </script>
+                    """, height=0)
 
                 elif st.session_state.started:
                     now = datetime.now()
@@ -185,11 +194,11 @@ else:
                         with col1:
                             if st.button("⬅️ Əvvəlki", disabled=idx == 0):
                                 st.session_state.current -= 1
-                                st.rerun()
+                                st.experimental_rerun()
                         with col2:
                             if st.button("🚩 Bitir"):
                                 st.session_state.current = len(st.session_state.questions)
-                                st.rerun()
+                                st.experimental_rerun()
                         with col3:
                             if st.button("➡️ Növbəti", disabled=(selected is None)):
                                 if len(st.session_state.answers) <= idx:
@@ -199,23 +208,9 @@ else:
                                     st.session_state.answers[idx] = selected
                                     st.session_state.correct_answers[idx] = correct
                                 st.session_state.current += 1
-                                st.rerun()
+                                st.experimental_rerun()
                     else:
-                        st.success("🎉 İmtahan tamamlandı!")
-                        score = sum(1 for a, b in zip(st.session_state.answers, st.session_state.correct_answers) if a == b)
-                        total = len(st.session_state.questions)
-                        percent = (score / total) * 100
-                        st.markdown(f"### ✅ Nəticə: {score} düzgün cavab / {total} sual")
-                        st.markdown(f"<p style='font-size:16px;'>📈 Doğruluq faizi: <strong>{percent:.2f}%</strong></p>", unsafe_allow_html=True)
-                        st.progress(score / total)
-
-                        with st.expander("📊 Detallı nəticələr"):
-                            for i, (ua, ca, q) in enumerate(zip(st.session_state.answers, st.session_state.correct_answers, st.session_state.questions)):
-                                status = "✅ Düzgün" if ua == ca else "❌ Səhv"
-                                st.markdown(f"**{i+1}) {q[0]}**\n• Sənin cavabın: `{ua}`\n• Doğru cavab: `{ca}` → {status}")
-
-                        if st.button("🔁 Yenidən Başla"):
-                            for key in list(st.session_state.keys()):
-                                del st.session_state[key]
-                            st.session_state.page = "home"
-                            st.rerun()
+                        st.success("✅ İmtahan tamamlandı!")
+                        correct_count = sum([1 for a, c in zip(st.session_state.answers, st.session_state.correct_answers) if a == c])
+                        st.write(f"**Doğru cavablar:** {correct_count} / {len(st.session_state.questions)}")
+                        # Burada istəsən nəticələri saxlamaq və ya göstərmək olar
