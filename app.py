@@ -216,26 +216,26 @@ else:
                             st.rerun()
 
    # 3️⃣ Bilet İmtahanı (Əlavə düzəlişlərlə)
-elif st.session_state.page == "ticket":
-    st.title("🎫 Bilet İmtahanı (Açıq suallar)")
-    uploaded_file = st.file_uploader("📤 Bilet sualları üçün Word (.docx) faylı seçin", type="docx")
+    elif st.session_state.page == "ticket":
+        st.title("🎫 Bilet İmtahanı (Açıq suallar)")
+        uploaded_file = st.file_uploader("📤 Bilet sualları üçün Word (.docx) faylı seçin", type="docx")
 
-    if uploaded_file:
-        questions = parse_open_questions(uploaded_file)
-        if len(questions) < 5:
-            st.error("❗ Kifayət qədər sual yoxdur (minimum 5 tələb olunur).")
-        else:
-            if "ticket_questions" not in st.session_state:
-                st.session_state.ticket_questions = []
+        if uploaded_file:
+            questions = parse_open_questions(uploaded_file)
+            if len(questions) < 5:
+                st.error("❗ Kifayət qədər sual yoxdur (minimum 5 tələb olunur).")
+            else:
+                if "ticket_questions" not in st.session_state:
+                    st.session_state.ticket_questions = []
 
-            if st.button("🎟 Bilet Çək"):
-                st.session_state.ticket_questions = random.sample(questions, 5)
-
-            if st.session_state.ticket_questions:
-                st.success("✅ Hazır bilet sualları:")
-                for i, q in enumerate(st.session_state.ticket_questions, 1):
-                    st.markdown(f"<p style='font-size:16px;'><strong>{i})</strong> {q}</p>", unsafe_allow_html=True)
-
-                st.markdown("---")
-                if st.button("🔁 Yenidən Bilet Çək"):
+                if st.button("🎟️ Bilet Çək"):
                     st.session_state.ticket_questions = random.sample(questions, 5)
+
+                if st.session_state.ticket_questions:
+                    st.success("✅ Hazır bilet sualları:")
+                    for i, q in enumerate(st.session_state.ticket_questions, 1):
+                        st.markdown(f"<p style='font-size:16px;'><strong>{i})</strong> {q}</p>", unsafe_allow_html=True)
+
+                    st.markdown("---")
+                    if st.button("🔁 Yenidən Bilet Çək"):
+                        st.session_state.ticket_questions = random.sample(questions, 5)
