@@ -175,23 +175,27 @@ else:
                         st.rerun()
 
                 elif st.session_state.exam_started and not st.session_state.exam_submitted:
-                    elapsed = datetime.now() - st.session_state.exam_start_time
-                    remaining = timedelta(minutes=60) - elapsed
-                    seconds_left = int(remaining.total_seconds())
 
-                    if seconds_left <= 0:
-                        st.warning("⏰ Vaxt bitdi! İmtahan tamamlandı.")
-                        st.session_state.exam_submitted = True
-                        st.rerun()
-                    else:
-                        mins, secs = divmod(seconds_left, 60)
-                        st.info(f"⏳ Qalan vaxt: {mins} dəq {secs} san")
+    if "50" in mode:
+        elapsed = datetime.now() - st.session_state.exam_start_time
+        remaining = timedelta(minutes=60) - elapsed
+        seconds_left = int(remaining.total_seconds())
 
-                        for i, (qtext, options, _) in enumerate(st.session_state.exam_questions):
-                            st.markdown(f"**{i+1}) {qtext}**")
-                            st.session_state.exam_answers[i] = st.radio(
-    label="", options=options, key=f"q_{i}", label_visibility="collapsed"
-)
+        if seconds_left <= 0:
+            st.warning("⏰ Vaxt bitdi! İmtahan tamamlandı.")
+            st.session_state.exam_submitted = True
+            st.rerun()
+        else:
+            mins, secs = divmod(seconds_left, 60)
+            st.info(f"⏳ Qalan vaxt: {mins} dəq {secs} san")
+    else:
+        st.info("ℹ Bu rejimdə vaxt limiti yoxdur.")
+
+    for i, (qtext, options, _) in enumerate(st.session_state.exam_questions):
+        st.markdown(f"{i+1}) {qtext}")
+        st.session_state.exam_answers[i] = st.radio(
+            label="", options=options, key=f"q_{i}", label_visibility="collapsed"
+        )
 
                         if st.button("📤 İmtahanı Bitir"):
                             st.session_state.exam_submitted = True
