@@ -68,7 +68,7 @@ if st.session_state.page == "home":
     st.title("📝 Testləri Qarışdır və Biliklərini Yoxla!")
     st.markdown("Zəhmət olmasa bir rejim seçin:")
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(2)
     with col1:
         if st.button("📝 Özünü imtahan et "):
             st.session_state.page = "exam"
@@ -77,7 +77,11 @@ if st.session_state.page == "home":
         if st.button("🎲 Sualları Qarışdır"):
             st.session_state.page = "shuffle"
             st.rerun()
-
+    with col3:
+        if st.button("🎫 Bilet İmtahanı"):
+            st.session_state.page = "ticket"
+            st.rerun()
+    
 # 📋 Əsas menyu və funksiya səhifələri
 else:
     # 🔙 Ana səhifəyə qayıt düyməsi
@@ -219,3 +223,59 @@ else:
                                 del st.session_state[key]
                             st.session_state.page = "home"
                             st.rerun()
+
+# 3️⃣ Bilet İmtahanı
+elif st.session_state.page == "ticket":
+    st.title("🎫 Bilet İmtahanı (Açıq Suallar)")
+
+    uploaded_file = st.file_uploader("📤 Word (.docx) faylını yüklə", type="docx")
+
+    if uploaded_file:
+        # Sadə sual nümunələrini oxuma
+        def extract_open_questions(docx_file):
+            doc = Document(docx_file)
+            pattern = re.compile(r"^\s*\d+[\.\)]\s+(.*)")
+            questions = []
+            for para in doc.paragraphs:
+                match = pattern.match(para.text.strip())
+                if match:
+                    questions.append(match.group(1).strip())
+            return questions
+
+        all_questions = extract_open_questions(uploaded_file)
+
+        if len(all_questions) < 5:
+            st.error("❗ Kifayət qədər sual tapılmadı.")
+        else:
+            if "ticket_questions" not in st.session_state:
+                st.session_state.ticket_questions = random.sample(all_questions, 5)
+                st.session_state.show_answers = False
+
+            st.markdown("### 📄 Sizin Bilet Suallarınız:")
+            for i, q in enumerate(st.session_state.ticket_questions, start=1):
+                st.markdown(f"{i}) {q}")
+
+            if not st.session_state.show_answers:
+                if st.button("🧠 Cavablara Keç"):
+                    st.session_state.show_answers = True
+                    st.rerun()
+            else:
+                st.markdown("---")
+                st.markdown("## 📘 Süni İntellektin Yazdığı Cavablar:")
+
+                # ✨ A4 ölçüsündə cavab yarat (təqribi 250-300 söz/sual)
+                for i, q in enumerate(st.session_state.ticket_questions, start=1):
+                    st.markdown(f"### {i}) {q}")
+                    with st.spinner("Cavab yazılır..."):
+                        # Süni intellekt cavabı yaradılır
+                        response = f"""
+{q} mövzusu informasiya təhlükəsizliyində mühüm yer tutur. Bu məsələyə gəldikdə, bir sıra əsas anlayışlar və tətbiq sahələri nəzərə alınmalıdır. Bu sualın cavablandırılması üçün ilk növbədə terminologiyanı aydınlaşdırmaq və sonra əsas strukturları, prinsipləri və tətbiqləri izah etmək lazımdır...
+
+(💡 Burada əsl cavab OpenAI API ilə dinamik olaraq yaradılmalıdır. Əgər istəyirsənsə, həmin hissəyə openai.ChatCompletion.create(...) ilə bağlı kod da əlavə edə bilərəm.)
+                        """
+                        st.markdown(response.strip())
+
+                if st.button("🔁 Yeni Bilet Yarat"):
+                    del st.session_state["ticket_questions"]
+                    st.session_state.show_answers = False
+                    st.rerun()
