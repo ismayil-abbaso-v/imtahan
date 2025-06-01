@@ -67,15 +67,15 @@ def create_shuffled_docx_and_answers(questions):
 def parse_open_questions(file):
     doc = Document(file)
     paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
-    question_pattern = re.compile(r"^\s*\d+[.)]\s+")
 
     questions = []
     for p in paragraphs:
-        if not question_pattern.match(p):
+        p = re.sub(r"^\s*\d+\s*[.)]?\s*", "", p)
+        if p:
             questions.append(p)
 
     return questions
-   
+    
 # 🌐 Sessiya idarəsi
 if "page" not in st.session_state:
     st.session_state.page = "home"
