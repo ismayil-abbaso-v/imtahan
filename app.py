@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
-# 🔧 Fayldan sualları oxuma funksiyası
 def full_text(paragraph):
     return ''.join(run.text for run in paragraph.runs).strip()
 
@@ -57,34 +56,32 @@ def create_shuffled_docx_and_answers(questions):
                 answer_key.append(f"{idx}) {letter}")
     return new_doc, answer_key
 
-# ✅ Bilet üçün xüsusi sual ayırıcı
+# ✅ Bilet üçün açıq sualları oxuma funksiyası (sənədin ilk nömrəli sətrindən başlayır)
 def parse_open_questions(file):
     doc = Document(file)
     open_questions = []
-    question_started = False
-    question_pattern = re.compile(r"^\s*\d+[.)]\s+")
+    found_start = False
+    number_like = re.compile(r"^\s*\d+[\.\)]?\s*")
 
     for para in doc.paragraphs:
         text = full_text(para).strip()
         if not text:
             continue
-        if not question_started and question_pattern.match(text):
-            question_started = True
-            question_text = question_pattern.sub('', text)
-            if question_text:
-                open_questions.append(question_text)
-        elif question_started:
+        if not found_start and number_like.match(text):
+            found_start = True
+        if found_start:
             open_questions.append(text)
     return open_questions
 
-# 🌐 Sessiya rejimini idarə et
+# Sessiya vəziyyəti
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
-# 🏠 Ana səhifə
+# Ana səhifə
 if st.session_state.page == "home":
     st.title("📝 Testləri Qarışdır və Biliklərini Yoxla!")
     st.markdown("Zəhmət olmasa bir rejim seçin:")
+
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("📝 Özünü imtahan et "):
@@ -99,7 +96,7 @@ if st.session_state.page == "home":
             st.session_state.page = "ticket"
             st.rerun()
 
-# 📋 Əsas menyu və funksiya səhifələri
+# Yan menyu və səhifə keçidi
 else:
     st.sidebar.title("🔧 Menyu")
     if st.sidebar.button("🏠 Ana Səhifəyə Qayıt"):
@@ -108,9 +105,16 @@ else:
         st.session_state.page = "home"
         st.rerun()
 
-    menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et", "🎫 Bilet İmtahanı"],
-                            index=["shuffle", "exam", "ticket"].index(st.session_state.page))
-    st.session_state.page = ["shuffle", "exam", "ticket"][["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et", "🎫 Bilet İmtahanı"].index(menu)]
+    menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et", "🎫 Bilet İmtahanı"])
+    selected_page = {
+        "🎲 Sualları Qarışdır": "shuffle",
+        "📝 Özünü İmtahan Et": "exam",
+        "🎫 Bilet İmtahanı": "ticket"
+    }[menu]
+
+    if selected_page != st.session_state.page:
+        st.session_state.page = selected_page
+        st.rerun()
 
     # 1️⃣ Sualları qarışdır
     if st.session_state.page == "shuffle":
@@ -219,7 +223,6 @@ else:
                     else:
                         st.success("🎉 İmtahan tamamlandı!")
                         score = sum(1 for a, b in zip(st.session_state.answers, st.session_state.correct_answers) if a == b)
-                        total = len(st.session_state.questions)
                         percent = (score / total) * 100
                         st.markdown(f"### ✅ Nəticə: {score} düzgün cavab / {total} sual")
                         st.markdown(f"<p style='font-size:16px;'>📈 Doğruluq faizi: <strong>{percent:.2f}%</strong></p>", unsafe_allow_html=True)
