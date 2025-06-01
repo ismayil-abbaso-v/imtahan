@@ -35,7 +35,7 @@ while i < len(paragraphs):
         i += 1
 return question_blocks
 
-🔧 Qarışdırılmış sualları və cavab açarını yaradan funksiya
+#🔧 Qarışdırılmış sualları və cavab açarını yaradan funksiya
 
 def create_shuffled_docx_and_answers(questions): new_doc = Document() answer_key = []
 
@@ -53,7 +53,7 @@ for idx, (question, options) in enumerate(questions, start=1):
 
 return new_doc, answer_key
 
-🔧 Açıq sualları oxuma funksiyası (bilet rejimi ücün)
+#🔧 Açıq sualları oxuma funksiyası (bilet rejimi ücün)
 
 def parse_open_questions(file): doc = Document(file) paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
 
