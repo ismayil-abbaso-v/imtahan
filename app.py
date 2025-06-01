@@ -176,7 +176,10 @@ else:
 
                 elif st.session_state.exam_started and not st.session_state.exam_submitted:
 
-    if "50" in mode:
+    # Zamanı yalnız 50 suallıq rejimdə göstər
+    use_timer = "50" in mode
+
+    if use_timer:
         elapsed = datetime.now() - st.session_state.exam_start_time
         remaining = timedelta(minutes=60) - elapsed
         seconds_left = int(remaining.total_seconds())
@@ -189,7 +192,7 @@ else:
             mins, secs = divmod(seconds_left, 60)
             st.info(f"⏳ Qalan vaxt: {mins} dəq {secs} san")
     else:
-        st.info("ℹ Bu rejimdə vaxt limiti yoxdur.")
+        st.info("ℹ Bu rejimdə zaman məhdudiyyəti yoxdur.")
 
     for i, (qtext, options, _) in enumerate(st.session_state.exam_questions):
         st.markdown(f"{i+1}) {qtext}")
