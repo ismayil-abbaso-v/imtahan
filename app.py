@@ -1,4 +1,9 @@
-import streamlit as st import re import random from docx import Document from io import BytesIO from datetime import datetime, timedelta
+import streamlit as st
+import re
+import random
+from docx import Document
+from io import BytesIO
+from datetime import datetime, timedelta
 
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
