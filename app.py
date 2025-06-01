@@ -235,7 +235,3 @@ else:
                     st.success("✅ Hazır bilet sualları:")
                     for i, q in enumerate(st.session_state.ticket_questions, 1):
                         st.markdown(f"<p style='font-size:16px;'><strong>{i})</strong> {q}</p>", unsafe_allow_html=True)
-
-                    st.markdown("---")
-                    if st.button("🔁 Yenidən Bilet Çək"):
-                        st.session_state.ticket_questions = random.sample(questions, 5)
