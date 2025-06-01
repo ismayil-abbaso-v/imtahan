@@ -138,7 +138,7 @@ else:
                 st.download_button("📥 Qarışdırılmış Suallar (.docx)", output_docx, "qarisdirilmis_suallar.docx")
                 st.download_button("📥 Cavab Açarı (.txt)", output_answers, "cavab_acari.txt")
 
-# 2️⃣ İmtahan rejimi (50 sual üçün vaxtölçən, bütün suallar üçün aralıq seçimi və limitsiz vaxt)
+# 2️⃣ İmtahan rejimi (50 sual üçün vaxtölçən, aralıq seçimi üçün limitsiz vaxt)
 elif st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi")
 
@@ -159,7 +159,6 @@ elif st.session_state.page == "exam":
             if "exam_start_time" not in st.session_state:
                 st.session_state.exam_start_time = None
 
-            # --- 50 Təsadüfi Sual ---
             if "50" in mode:
                 st.info("📌 60 dəqiqə vaxtınız olacaq. Variantlar qarışıqdır.")
                 if not st.session_state.exam_started:
@@ -177,10 +176,8 @@ elif st.session_state.page == "exam":
                         st.session_state.exam_start_time = datetime.now()
                         st.session_state.exam_started = True
                         st.rerun()
-
-            # --- Aralıq Sual Seçimi ---
             else:
-                st.info("📌 Vaxt məhdudiyyəti yoxdur. Ardıcıl sual aralığı seçin.")
+                st.info("📌 Vaxt məhdudiyyəti yoxdur. Aralıq seçin.")
                 start_q = st.number_input("🔢 Başlanğıc sual nömrəsi", min_value=1, max_value=total_questions, value=1)
                 end_q = st.number_input("🔢 Sonuncu sual nömrəsi", min_value=start_q, max_value=total_questions, value=min(start_q + 49, total_questions))
 
@@ -199,7 +196,6 @@ elif st.session_state.page == "exam":
                         st.session_state.exam_started = True
                         st.rerun()
 
-            # --- İmtahan gedişi ---
             if st.session_state.exam_started and not st.session_state.exam_submitted:
                 if "50" in mode:
                     elapsed = datetime.now() - st.session_state.exam_start_time
@@ -224,7 +220,6 @@ elif st.session_state.page == "exam":
                     st.session_state.exam_submitted = True
                     st.rerun()
 
-            # --- Nəticə ---
             elif st.session_state.exam_submitted:
                 st.success("🎉 İmtahan tamamlandı!")
 
