@@ -127,7 +127,7 @@ else:
                 st.download_button("📥 Qarışdırılmış Suallar (.docx)", output_docx, "qarisdirilmis_suallar.docx")
                 st.download_button("📥 Cavab Açarı (.txt)", output_answers, "cavab_acari.txt")
 
-# 2️⃣ İmtahan rejimi (50 sual üçün vaxtölçən, aralıq seçimi üçün limitsiz vaxt)
+# 2️⃣ İmtahan rejimi (Hamısı bir səhifədə + qarışıq variantlar + vaxtölçən + aralıq seçimi)
 elif st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi")
 
@@ -149,7 +149,7 @@ elif st.session_state.page == "exam":
                 st.session_state.exam_start_time = None
 
             if "50" in mode:
-                st.info("📌 60 dəqiqə vaxtınız olacaq. Variantlar qarışıqdır.")
+                st.info("📌 60 dəqiqə vaxtınız olacaq.")
                 if not st.session_state.exam_started:
                     if st.button("🚀 İmtahana Başla"):
                         selected = random.sample(questions, min(50, total_questions))
@@ -166,7 +166,7 @@ elif st.session_state.page == "exam":
                         st.session_state.exam_started = True
                         st.rerun()
             else:
-                st.info("📌 Vaxt məhdudiyyəti yoxdur. Aralıq seçin.")
+                st.info("📌 Vaxt limiti yoxdur. İstədiyiniz aralığı seçin.")
                 start_q = st.number_input("🔢 Başlanğıc sual nömrəsi", min_value=1, max_value=total_questions, value=1)
                 end_q = st.number_input("🔢 Sonuncu sual nömrəsi", min_value=start_q, max_value=total_questions, value=min(start_q + 49, total_questions))
 
@@ -190,7 +190,6 @@ elif st.session_state.page == "exam":
                     elapsed = datetime.now() - st.session_state.exam_start_time
                     remaining = timedelta(minutes=60) - elapsed
                     seconds_left = int(remaining.total_seconds())
-
                     if seconds_left <= 0:
                         st.warning("⏰ Vaxt bitdi! İmtahan tamamlandı.")
                         st.session_state.exam_submitted = True
@@ -211,7 +210,6 @@ elif st.session_state.page == "exam":
 
             elif st.session_state.exam_submitted:
                 st.success("🎉 İmtahan tamamlandı!")
-
                 correct_list = [correct for _, _, correct in st.session_state.exam_questions]
                 score = sum(1 for a, b in zip(st.session_state.exam_answers, correct_list) if a == b)
                 total = len(correct_list)
