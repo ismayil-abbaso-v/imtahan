@@ -2,7 +2,7 @@ import streamlit as st import re import random from docx import Document from io
 
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
-🔧 Fayldan test suallarını oxuma funksiyası
+#🔧 Fayldan test suallarını oxuma funksiyası
 
 def full_text(paragraph): return ''.join(run.text for run in paragraph.runs).strip()
 
