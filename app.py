@@ -139,11 +139,17 @@ else:
 
                 if not st.session_state.exam_started:
                     if st.button("🚀 İmtahana Başla"):
-                        st.session_state.exam_questions = random.sample(questions, min(50, len(questions))) if "50" in mode else questions
-                        st.session_state.exam_answers = [""] * len(st.session_state.exam_questions)
-                        st.session_state.exam_start_time = datetime.now()
-                        st.session_state.exam_started = True
-                        st.rerun()
+                    st.session_state.exam_questions = random.sample(questions, min(50, len(questions))) if "50" in mode else questions
+                    # 🔀 Variantları qarışdır
+                    for i in range(len(st.session_state.exam_questions)):
+                    q_text, opts = st.session_state.exam_questions[i]
+                    opts = opts[:] # orijinal sıralamanı qorumaq üçün kopyalanır
+                    random.shuffle(opts)
+                    st.session_state.exam_questions[i] = (q_text, opts)
+                    st.session_state.exam_answers = [""] * len(st.session_state.exam_questions)
+                    st.session_state.exam_start_time = datetime.now()
+                    st.session_state.exam_started = True
+                    st.rerun()
 
                 elif st.session_state.exam_started and not st.session_state.exam_submitted:
                     # VAQT NƏZARƏTİ
