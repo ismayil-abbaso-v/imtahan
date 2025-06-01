@@ -108,14 +108,21 @@ else:
         st.session_state.page = "home"
         st.rerun()
 
-    menu = st.sidebar.radio("➡ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et", "🎫 Bilet İmtahanı"],
-    index=["shuffle", "exam", "ticket"].index(st.session_state.page), key="menu_radio")
+    menu_options = {
+    "🎲 Sualları Qarışdır": "shuffle",
+    "📝 Özünü İmtahan Et": "exam",
+    "🎫 Bilet İmtahanı": "ticket"
+}
 
-new_page = {"🎲 Sualları Qarışdır": "shuffle", "📝 Özünü İmtahan Et": "exam", "🎫 Bilet İmtahanı": "ticket"}[menu]
+menu_labels = list(menu_options.keys())
+menu_index = menu_labels.index(next(k for k, v in menu_options.items() if v == st.session_state.page))
 
-if new_page != st.session_state.page:
-    st.session_state.page = new_page
-    st.rerun()
+selected_label = st.sidebar.radio("➡ Rejimi dəyiş:", menu_labels, index=menu_index)
+
+selected_page = menu_options[selected_label]
+if selected_page != st.session_state.page:
+    st.session_state.page = selected_page
+    st.experimental_rerun()
 
      # 1️⃣ Sualları qarışdır
     if st.session_state.page == "shuffle":
