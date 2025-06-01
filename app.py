@@ -167,6 +167,10 @@ else:
                         mins, secs = divmod(seconds_left, 60)
                         st.info(f"⏳ Qalan vaxt: {mins} dəq {secs} san")
 
+                        for i, (qtext, options, _) in enumerate(st.session_state.exam_questions):
+                            st.markdown(f"**{i+1}) {qtext}**")
+                            st.session_state.exam_answers[i] = st.radio(options, key=f"q_{i}")
+
                         if st.button("📤 İmtahanı Bitir"):
                             st.session_state.exam_submitted = True
                             st.rerun()
