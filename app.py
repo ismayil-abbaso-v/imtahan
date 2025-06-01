@@ -142,7 +142,7 @@ else:
 
         st.markdown("🚧 İmtahan hissəsi burada saxlanılıb – dəyişiklik olunmayıb.")
 
-    # 3️⃣ Bilet İmtahanı (Əlavə düzəlişlərlə)
+      # 3️⃣ Bilet İmtahanı (🎟️ düyməsi bir dəfəlik)
     elif st.session_state.page == "ticket":
         st.title("🎫 Bilet İmtahanı (Açıq suallar)")
         uploaded_file = st.file_uploader("📤 Bilet sualları üçün Word (.docx) faylı seçin", type="docx")
@@ -154,11 +154,15 @@ else:
             else:
                 if "ticket_questions" not in st.session_state:
                     st.session_state.ticket_questions = []
+                if "ticket_started" not in st.session_state:
+                    st.session_state.ticket_started = False
 
-                if st.button("🎟️ Bilet Çək"):
-                    st.session_state.ticket_questions = random.sample(questions, 5)
+                if not st.session_state.ticket_started:
+                    if st.button("🎟️ Bilet Çək"):
+                        st.session_state.ticket_questions = random.sample(questions, 5)
+                        st.session_state.ticket_started = True
 
-                if st.session_state.ticket_questions:
+                if st.session_state.ticket_started:
                     st.success("✅ Hazır bilet sualları:")
                     for i, q in enumerate(st.session_state.ticket_questions, 1):
                         st.markdown(f"<p style='font-size:16px;'><strong>{i})</strong> {q}</p>", unsafe_allow_html=True)
