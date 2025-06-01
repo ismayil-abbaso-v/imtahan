@@ -98,37 +98,12 @@ else:
         st.session_state.page = "home"
         st.rerun()
 
-    menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et", "🎫 Bilet İmtahanı"],
-                            index=["shuffle", "exam", "ticket"].index(st.session_state.page))
-    st.session_state.page = {"🎲 Sualları Qarışdır": "shuffle", "📝 Özünü İmtahan Et": "exam", "🎫 Bilet İmtahanı": "ticket"}[menu]
-
-if st.session_state.page == "shuffle":
-    st.title("🎲 Test Suallarını Qarışdır və Cavab Açarı Yarat")
-    uploaded_file = st.file_uploader("📤 Word (.docx) sənədini seçin", type="docx")
-    mode = st.radio("💡 Sualların sayı:", ["🔹 50 təsadüfi sual", "🔸 Bütün suallar"], index=0)
-
-    if uploaded_file:
-        questions = parse_docx(uploaded_file)
-        if len(questions) < 5:
-            st.error("❗ Faylda kifayət qədər uyğun sual tapılmadı.")
-        else:
-            selected = random.sample(questions, min(50, len(questions))) if "50" in mode else questions
-            new_doc, answer_key = create_shuffled_docx_and_answers(selected)
-
-            output_docx = BytesIO()
-            new_doc.save(output_docx)
-            output_docx.seek(0)
-
-            output_answers = BytesIO()
-            output_answers.write('\n'.join(answer_key).encode('utf-8'))
-            output_answers.seek(0)
-
-            st.success("✅ Qarışdırılmış sənədlər hazırdır!")
-            st.download_button("📥 Qarışdırılmış Suallar (.docx)", output_docx, "qarisdirilmis_suallar.docx")
-            st.download_button("📥 Cavab Açarı (.txt)", output_answers, "cavab_acari.txt")
-
-elif st.session_state.page == "exam":
-    st.title("📝 Özünü Sına: İmtahan Rejimi (60 dəqiqəlik)")
+    menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı"],
+                            index=["exam", "shuffle", "ticket"].index(st.session_state.page))
+    st.session_state.page = {"📝 Özünü İmtahan Et": "exam", "🎲 Sualları Qarışdır": "shuffle", "🎫 Bilet İmtahanı": "ticket"}[menu]
+    
+if st.session_state.page == "exam":
+    st.title("📝 Özünü Sına: İmtahan Rejimi ")
     uploaded_file = st.file_uploader("📤 İmtahan üçün Word (.docx) faylını seçin", type="docx")
     mode = st.radio("📌 Sual seçimi:", ["🔹 50 təsadüfi sual", "🔸 Bütün suallar"], index=0)
 
@@ -210,6 +185,31 @@ elif st.session_state.page == "exam":
                         if key in st.session_state:
                             del st.session_state[key]
                     st.rerun()
+
+elif st.session_state.page == "shuffle":
+    st.title("🎲 Test Suallarını Qarışdır və Cavab Açarı Yarat")
+    uploaded_file = st.file_uploader("📤 Word (.docx) sənədini seçin", type="docx")
+    mode = st.radio("💡 Sualların sayı:", ["🔹 50 təsadüfi sual", "🔸 Bütün suallar"], index=0)
+
+    if uploaded_file:
+        questions = parse_docx(uploaded_file)
+        if len(questions) < 5:
+            st.error("❗ Faylda kifayət qədər uyğun sual tapılmadı.")
+        else:
+            selected = random.sample(questions, min(50, len(questions))) if "50" in mode else questions
+            new_doc, answer_key = create_shuffled_docx_and_answers(selected)
+
+            output_docx = BytesIO()
+            new_doc.save(output_docx)
+            output_docx.seek(0)
+
+            output_answers = BytesIO()
+            output_answers.write('\n'.join(answer_key).encode('utf-8'))
+            output_answers.seek(0)
+
+            st.success("✅ Qarışdırılmış sənədlər hazırdır!")
+            st.download_button("📥 Qarışdırılmış Suallar (.docx)", output_docx, "qarisdirilmis_suallar.docx")
+            st.download_button("📥 Cavab Açarı (.txt)", output_answers, "cavab_acari.txt")
 
 elif st.session_state.page == "ticket":
     st.title("🎫 Bilet İmtahanı (Açıq suallar)")
