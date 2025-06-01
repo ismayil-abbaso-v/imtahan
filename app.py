@@ -15,7 +15,6 @@ def parse_docx(file):
     doc = Document(file)
     question_pattern = re.compile(r"^\s*\d+[.)]\s+")
     option_pattern = re.compile(r"^\s*[A-Ea-e])\s+(.*)")
-
     paragraphs = list(doc.paragraphs)
     i = 0
     question_blocks = []
@@ -51,30 +50,34 @@ def create_shuffled_docx_and_answers(questions):
         new_doc.add_paragraph(f"{idx}) {question}")
         correct_answer = options[0]
         random.shuffle(options)
-
-        for j, option in enumerate(options):    
-            letter = chr(ord('A') + j)    
-            new_doc.add_paragraph(f"{letter}) {option}")    
-            if option.strip() == correct_answer.strip():    
+        for j, option in enumerate(options):
+            letter = chr(ord('A') + j)
+            new_doc.add_paragraph(f"{letter}) {option}")
+            if option.strip() == correct_answer.strip():
                 answer_key.append(f"{idx}) {letter}")
-
     return new_doc, answer_key
 
-# ✅ Yeni: Açıq tipli sualları oxumaq üçün funksiya (bilet üçün)
+# ✅ Bilet üçün xüsusi sual ayırıcı
 def parse_open_questions(file):
     doc = Document(file)
     open_questions = []
-    question_pattern = re.compile(r"^\s*\d+[.)]?\s+(.*)")
+    question_started = False
+    question_pattern = re.compile(r"^\s*\d+[.)]\s+")
+
     for para in doc.paragraphs:
-        text = full_text(para)
-        match = question_pattern.match(text)
-        if match:
-            question_text = match.group(1).strip()
+        text = full_text(para).strip()
+        if not text:
+            continue
+        if not question_started and question_pattern.match(text):
+            question_started = True
+            question_text = question_pattern.sub('', text)
             if question_text:
                 open_questions.append(question_text)
+        elif question_started:
+            open_questions.append(text)
     return open_questions
 
-# 🌐 Sessiya rejimini idarə edək
+# 🌐 Sessiya rejimini idarə et
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
@@ -82,7 +85,6 @@ if "page" not in st.session_state:
 if st.session_state.page == "home":
     st.title("📝 Testləri Qarışdır və Biliklərini Yoxla!")
     st.markdown("Zəhmət olmasa bir rejim seçin:")
-
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("📝 Özünü imtahan et "):
@@ -106,7 +108,6 @@ else:
         st.session_state.page = "home"
         st.rerun()
 
-    # Rejim seçimi menyusu
     menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et", "🎫 Bilet İmtahanı"],
                             index=["shuffle", "exam", "ticket"].index(st.session_state.page))
     st.session_state.page = ["shuffle", "exam", "ticket"][["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et", "🎫 Bilet İmtahanı"].index(menu)]
@@ -247,10 +248,8 @@ else:
                 if "ticket_questions" not in st.session_state or st.button("🔄 Bileti Dəyiş"):
                     st.session_state.ticket_questions = random.sample(questions, 5)
                     st.session_state.show_ticket = False
-
                 if st.button("🎫 Bileti Seç"):
                     st.session_state.show_ticket = True
-
                 if st.session_state.get("show_ticket", False):
                     st.subheader("📋 Sizin Bilet:")
                     for i, q in enumerate(st.session_state.ticket_questions, start=1):
