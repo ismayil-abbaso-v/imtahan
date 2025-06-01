@@ -46,32 +46,15 @@ def parse_docx(file):
 # 🔧 Açıq sualları oxuma funksiyası (bilet rejimi üçün)
 def parse_open_questions(file):
     doc = Document(file)
-    question_pattern = re.compile(r"^\s*\d+[.)]\s+(.*)")
+    paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+    question_pattern = re.compile(r"^\s*\d+[.)]\s+")
+
     questions = []
+    for p in paragraphs:
+        if not question_pattern.match(p):
+            questions.append(p)
 
-    for para in doc.paragraphs:
-        text = full_text(para)
-        match = question_pattern.match(text)
-        if match:
-            questions.append(match.group(1).strip())
     return questions
-
-def create_shuffled_docx_and_answers(questions):
-    new_doc = Document()
-    answer_key = []
-
-    for idx, (question, options) in enumerate(questions, start=1):
-        new_doc.add_paragraph(f"{idx}) {question}")
-        correct_answer = options[0]
-        random.shuffle(options)
-
-        for j, option in enumerate(options):
-            letter = chr(ord('A') + j)
-            new_doc.add_paragraph(f"{letter}) {option}")
-            if option.strip() == correct_answer.strip():
-                answer_key.append(f"{idx}) {letter}")
-
-    return new_doc, answer_key
 
 # 🌐 Sessiya idarəsi
 if "page" not in st.session_state:
