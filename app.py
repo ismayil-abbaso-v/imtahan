@@ -118,7 +118,7 @@ else:
                 st.download_button("📥 Qarışdırılmış Suallar (.docx)", output_docx, "qarisdirilmis_suallar.docx")
                 st.download_button("📥 Cavab Açarı (.txt)", output_answers, "cavab_acari.txt")
 
-# 2️⃣ İmtahan rejimi (Hamısı bir səhifədə + vaxtölçən + qarışıq variantlar)
+# 2️⃣ İmtahan rejimi (Hamısı bir səhifədə + qarışıq variantlar + vaxtölçən)
     elif st.session_state.page == "exam":
         st.title("📝 Özünü Sına: İmtahan Rejimi (60 dəqiqəlik)")
 
