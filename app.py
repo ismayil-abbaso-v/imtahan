@@ -108,12 +108,7 @@ else:
 
     menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et", "🎫 Bilet İmtahanı"],
         index=["shuffle", "exam", "ticket"].index(st.session_state.page))
-    if menu == "🎲 Sualları Qarışdır":
-        st.session_state.page = "shuffle"
-    elif menu == "📝 Özünü İmtahan Et":
-        st.session_state.page = "exam"
-    elif menu == "🎫 Bilet İmtahanı":
-        st.session_state.page = "ticket"
+    st.session_state.page = {"🎲 Sualları Qarışdır": "shuffle", "📝 Özünü İmtahan Et": "exam", "🎫 Bilet İmtahanı": "ticket"}[menu]
 
 # 🎲 Sualları qarışdır
 if st.session_state.page == "shuffle":
@@ -141,12 +136,12 @@ if st.session_state.page == "shuffle":
             st.download_button("📥 Qarışdırılmış Suallar (.docx)", output_docx, "qarisdirilmis_suallar.docx")
             st.download_button("📥 Cavab Açarı (.txt)", output_answers, "cavab_acari.txt")
 
-# 📝 İmtahan rejimi
+# 📝 İmtahan rejimi (bərpa olunmuş)
 elif st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi")
-    st.write("Bu hissə əvvəlki imtahan funksiyası ilə eynidir (variantlı test).")
+    st.write("Bu hissə əvvəlki testlərlə özünü yoxlama rejimidir.")
 
-# 🎫 Bilet İmtahanı
+# 🎫 Bilet İmtahanı (Yenilənmiş)
 elif st.session_state.page == "ticket":
     st.title("🎫 Bilet İmtahanı (Açıq suallar)")
     uploaded_file = st.file_uploader("📤 Bilet sualları üçün Word (.docx) faylı seçin", type="docx")
@@ -156,9 +151,14 @@ elif st.session_state.page == "ticket":
         if len(questions) < 5:
             st.error("❗ Kifayət qədər sual yoxdur (minimum 5 tələb olunur).")
         else:
-            selected_questions = random.sample(questions, 5)
-            st.success("✅ Təsadüfi seçilmiş 5 sual aşağıdadır:")
-            for i, q in enumerate(selected_questions, 1):
+            if st.button("🆕 Yeni Bilet Yarat"):
+                st.session_state.ticket_questions = random.sample(questions, 5)
+
+            if "ticket_questions" not in st.session_state:
+                st.session_state.ticket_questions = random.sample(questions, 5)
+
+            st.success("✅ Hazır bilet sualları:")
+            for i, q in enumerate(st.session_state.ticket_questions, 1):
                 st.markdown(f"### {i}) {q}")
 
-            st.info("📌 Bu suallar bilet formasında təqdim olunur. Cavabları kağız üzərində və ya başqa səhifədə yazın.")
+            st.info("📌 Bu suallar bilet formasında təqdim olunur. Cavabları ayrıca yazın.")
