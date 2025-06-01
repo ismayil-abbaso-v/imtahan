@@ -92,7 +92,7 @@ else:
         index=["shuffle", "exam", "ticket"].index(st.session_state.page))
     st.session_state.page = {"🎲 Sualları Qarışdır": "shuffle", "📝 Özünü İmtahan Et": "exam", "🎫 Bilet İmtahanı": "ticket"}[menu]
 
-   # 1️⃣ Sualları qarışdır
+     # 1️⃣ Sualları qarışdır
     if st.session_state.page == "shuffle":
         st.title("🎲 Test Suallarını Qarışdır və Cavab Açarı Yarat")
         uploaded_file = st.file_uploader("📤 Word (.docx) sənədini seçin", type="docx")
