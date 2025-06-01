@@ -46,15 +46,32 @@ def parse_docx(file):
 # 🔧 Açıq sualları oxuma funksiyası (bilet rejimi üçün)
 def parse_open_questions(file):
     doc = Document(file)
-    paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
-    question_pattern = re.compile(r"^\s*\d+[.)]\s+")
-
+    question_pattern = re.compile(r"^\s*\d+[.)]\s+(.*)")
     questions = []
-    for p in paragraphs:
-        if not question_pattern.match(p):
-            questions.append(p)
 
+    for para in doc.paragraphs:
+        text = full_text(para)
+        match = question_pattern.match(text)
+        if match:
+            questions.append(match.group(1).strip())
     return questions
+
+def create_shuffled_docx_and_answers(questions):
+    new_doc = Document()
+    answer_key = []
+
+    for idx, (question, options) in enumerate(questions, start=1):
+        new_doc.add_paragraph(f"{idx}) {question}")
+        correct_answer = options[0]
+        random.shuffle(options)
+
+        for j, option in enumerate(options):
+            letter = chr(ord('A') + j)
+            new_doc.add_paragraph(f"{letter}) {option}")
+            if option.strip() == correct_answer.strip():
+                answer_key.append(f"{idx}) {letter}")
+
+    return new_doc, answer_key
 
 # 🌐 Sessiya idarəsi
 if "page" not in st.session_state:
@@ -216,20 +233,18 @@ else:
                             st.rerun()
 
     # 3️⃣ Bilet İmtahanı
-elif st.session_state.page == "ticket":
-    st.title("🎫 Bilet İmtahanı (Açıq suallar)")
-    uploaded_file = st.file_uploader("📤 Bilet sualları üçün Word (.docx) faylı seçin", type="docx")
+    elif st.session_state.page == "ticket":
+        st.title("🎫 Bilet İmtahanı (Açıq suallar)")
+        uploaded_file = st.file_uploader("📤 Bilet sualları üçün Word (.docx) faylı seçin", type="docx")
 
-    if uploaded_file:
-        questions = parse_open_questions(uploaded_file)
-        if len(questions) < 5:
-            st.error("❗ Kifayət qədər sual yoxdur (minimum 5 tələb olunur).")
-        else:
+        if uploaded_file:
+            if "ticket_all" not in st.session_state or st.session_state.get("last_ticket_file") != uploaded_file.name:
+                st.session_state.ticket_all = parse_open_questions(uploaded_file)
+                st.session_state.last_ticket_file = uploaded_file.name
+                st.session_state.ticket_questions = random.sample(st.session_state.ticket_all, 5)
+
             if st.button("🆕 Yeni Bilet Yarat"):
-                st.session_state.ticket_questions = random.sample(questions, 5)
-
-            if "ticket_questions" not in st.session_state:
-                st.session_state.ticket_questions = random.sample(questions, 5)
+                st.session_state.ticket_questions = random.sample(st.session_state.ticket_all, 5)
 
             st.success("✅ Hazır bilet sualları:")
             for i, q in enumerate(st.session_state.ticket_questions, 1):
