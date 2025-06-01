@@ -1,4 +1,3 @@
-
 import streamlit as st
 import re
 import random
@@ -87,28 +86,36 @@ if st.session_state.page == "home":
     with col1:
         if st.button("📝 Özünü imtahan et"):
             st.session_state.page = "exam"
-            st.rerun()
+            st.experimental_rerun()
     with col2:
         if st.button("🎲 Sualları Qarışdır"):
             st.session_state.page = "shuffle"
-            st.rerun()
+            st.experimental_rerun()
     with col3:
         if st.button("🎫 Bilet İmtahanı"):
             st.session_state.page = "ticket"
-            st.rerun()
+            st.experimental_rerun()
 
-# 📋 Əsas menyu
-else:
+# 📋 Əsas menyu (sidebar)
+elif st.session_state.page != "home":
     st.sidebar.title("🔧 Menyu")
     if st.sidebar.button("🏠 Ana Səhifəyə Qayıt"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.session_state.page = "home"
-        st.rerun()
+        st.experimental_rerun()
 
-    menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["🎲 Sualları Qarışdır", "📝 Özünü İmtahan Et", "🎫 Bilet İmtahanı"],
-        index=["shuffle", "exam", "ticket"].index(st.session_state.page))
-    st.session_state.page = {"🎲 Sualları Qarışdır": "shuffle", "📝 Özünü İmtahan Et": "exam", "🎫 Bilet İmtahanı": "ticket"}[menu]
+    if st.sidebar.button("🎲 Sualları Qarışdır"):
+        st.session_state.page = "shuffle"
+        st.experimental_rerun()
+
+    if st.sidebar.button("📝 Özünü İmtahan Et"):
+        st.session_state.page = "exam"
+        st.experimental_rerun()
+
+    if st.sidebar.button("🎫 Bilet İmtahanı"):
+        st.session_state.page = "ticket"
+        st.experimental_rerun()
 
 # 🎲 Sualları qarışdır
 if st.session_state.page == "shuffle":
@@ -136,12 +143,38 @@ if st.session_state.page == "shuffle":
             st.download_button("📥 Qarışdırılmış Suallar (.docx)", output_docx, "qarisdirilmis_suallar.docx")
             st.download_button("📥 Cavab Açarı (.txt)", output_answers, "cavab_acari.txt")
 
-# 📝 İmtahan rejimi (bərpa olunmuş)
+# 📝 Özünü imtahan et
 elif st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi")
-    st.write("Bu hissə əvvəlki testlərlə özünü yoxlama rejimidir.")
+    uploaded_file = st.file_uploader("📤 Test sualları üçün Word (.docx) faylı seçin", type="docx")
+    
+    if uploaded_file:
+        questions = parse_docx(uploaded_file)
+        if len(questions) < 5:
+            st.error("❗ Faylda kifayət qədər sual tapılmadı.")
+        else:
+            num_questions = st.slider("Neçə sual cavablandırmaq istəyirsiniz?", 5, min(50, len(questions)), 10)
+            selected_questions = random.sample(questions, num_questions)
+            score = 0
 
-# 🎫 Bilet İmtahanı (Yenilənmiş)
+            st.write("Suallara cavab verin:")
+            user_answers = []
+            for i, (question, options) in enumerate(selected_questions, 1):
+                st.markdown(f"**{i}) {question}**")
+                choices = options.copy()
+                random.shuffle(choices)
+                ans = st.radio(f"Cavab {i}:", choices, key=f"exam_q_{i}")
+                user_answers.append((question, options, ans))
+
+            if st.button("Nəticəni Yoxla"):
+                score = 0
+                for q, opts, user_ans in user_answers:
+                    correct_ans = opts[0]
+                    if user_ans.strip() == correct_ans.strip():
+                        score += 1
+                st.success(f"📝 Sənin nəticən: {score} / {num_questions}")
+
+# 🎫 Bilet İmtahanı (Açıq suallar)
 elif st.session_state.page == "ticket":
     st.title("🎫 Bilet İmtahanı (Açıq suallar)")
     uploaded_file = st.file_uploader("📤 Bilet sualları üçün Word (.docx) faylı seçin", type="docx")
