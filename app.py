@@ -14,34 +14,36 @@ def full_text(paragraph):
 
 def parse_docx(file):
     doc = Document(file)
-    paragraphs = [full_text(p) for p in doc.paragraphs if full_text(p)]
+    question_pattern = re.compile(r"^\s*\d+[.)]\s+")
+    option_pattern = re.compile(r"^\s*[A-Ea-e]\)\s+(.*)")
 
-    question_blocks = []
+    paragraphs = list(doc.paragraphs)
     i = 0
+    question_blocks = []
+
     while i < len(paragraphs):
-        block = []
-        # Sual blokunu yığ (variantlar istisna olmaqla)
-        while i < len(paragraphs):
-            text = paragraphs[i]
-            block.append(text)
+        text = full_text(paragraphs[i])
+        if question_pattern.match(text):
+            question_text = question_pattern.sub('', text)
             i += 1
-            # Sual blokunun sonuna gəlib-gəlmədiyimizi yoxlayaq
-            if i + 5 <= len(paragraphs):
-                possible_options = paragraphs[i:i+5]
-                variant_pattern = re.compile(r"^\s*([A-Ea-e][\)\.]?)\s+")
-                if all(variant_pattern.match(p) for p in possible_options):
-                    break # 5 variant gəldi, burda sual bitdi
-
-        # Əgər 5 variant varsa, onları ayır
-        if i + 5 <= len(paragraphs):
-            options = paragraphs[i:i+5]
-            i += 5 # variantlardan sonra növbəti suala keçmək üçün
-            question_text = "\n".join(block)
-            cleaned_options = [re.sub(r"^\s*([A-Ea-e][\)\.]?)\s+", "", opt).strip() for opt in options]
-            question_blocks.append((question_text, cleaned_options))
-
+            options = []
+            while i < len(paragraphs):
+                text = full_text(paragraphs[i])
+                match = option_pattern.match(text)
+                if match:
+                    options.append(match.group(1).strip())
+                    i += 1
+                elif text and not question_pattern.match(text) and len(options) < 5:
+                    options.append(text)
+                    i += 1
+                else:
+                    break
+            if len(options) == 5:
+                question_blocks.append((question_text, options))
+        else:
+            i += 1
     return question_blocks
-    
+
 # 🔧 Qarışdırılmış sualları və cavab açarını yaradan funksiya
 def create_shuffled_docx_and_answers(questions):
     new_doc = Document()
