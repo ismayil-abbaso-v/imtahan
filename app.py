@@ -170,7 +170,7 @@ else:
                         for i, (qtext, options, _) in enumerate(st.session_state.exam_questions):
                             st.markdown(f"**{i+1}) {qtext}**")
                             st.session_state.exam_answers[i] = st.radio(
-    label="", options=options, key=f"q_clean_{i}", label_visibility="collapsed"
+    label="", options=options, key=f"q_{i}", label_visibility="collapsed"
 )
 
                         if st.button("📤 İmtahanı Bitir"):
