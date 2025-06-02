@@ -1,4 +1,3 @@
-
 import streamlit as st
 import re
 import random
@@ -7,6 +6,22 @@ from io import BytesIO
 from datetime import datetime, timedelta
 
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
+
+# 💅 Stil (CSS) görünüş üçün
+st.markdown("""
+<style>
+    section[data-testid="stSidebar"] h1 {
+        font-size: 20px;
+        color: #2c3e50;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 4px;
+        margin-bottom: 10px;
+    }
+    .stRadio > label {
+        font-weight: 500;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 def full_text(paragraph):
     return ''.join(run.text for run in paragraph.runs).strip()
@@ -91,14 +106,14 @@ if st.session_state.page == "home":
             st.session_state.page = "ticket"
             st.rerun()
 else:
-    st.sidebar.title("🔧 Menyu")
-    if st.sidebar.button("🏠 Ana Səhifəyə Qayıt"):
+    st.sidebar.title("⚙️ Menyu")
+    if st.sidebar.button("🏠 Ana Səhifəyə"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.session_state.page = "home"
         st.rerun()
 
-    menu = st.sidebar.radio("➡️ Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı"],
+    menu = st.sidebar.radio("🔁 Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı"],
                             index=["exam", "shuffle", "ticket"].index(st.session_state.page))
     st.session_state.page = {"📝 Özünü İmtahan Et": "exam", "🎲 Sualları Qarışdır": "shuffle", "🎫 Bilet İmtahanı": "ticket"}[menu]
     
