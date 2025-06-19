@@ -12,30 +12,28 @@ def full_text(paragraph):
 
 def parse_docx(file):
     doc = Document(file)
-    paragraphs = [full_text(p) for p in doc.paragraphs if full_text(p)]
-
-    question_pattern = re.compile(r"^\s*(\d+[.)]|Choose|Find|Select|Which|What|Who|When|Where|How)\s", re.IGNORECASE)
+    question_pattern = re.compile(r"^\s*\d+[.)]\s+")
     option_pattern = re.compile(r"^\s*[A-Ea-e][).]?\s+(.*)")
 
-    question_blocks = []
+    paragraphs = [full_text(p) for p in doc.paragraphs if full_text(p)]
     i = 0
+    question_blocks = []
+
     while i < len(paragraphs):
         line = paragraphs[i]
         if question_pattern.match(line):
-            question_text = line.strip()
+            question_text = question_pattern.sub('', line).strip()
             i += 1
             options = []
-            while i < len(paragraphs):
-                next_line = paragraphs[i]
-                if option_pattern.match(next_line):
-                    option_text = option_pattern.sub(r'\1', next_line).strip()
-                    options.append(option_text)
-                elif len(options) < 5:
-                    options.append(next_line.strip())
+            while i < len(paragraphs) and len(options) < 5:
+                option_line = paragraphs[i]
+                match = option_pattern.match(option_line)
+                if match:
+                    options.append(match.group(1).strip())
+                    i += 1
                 else:
                     break
-                i += 1
-            if len(options) >= 2:
+            if len(options) == 5:
                 question_blocks.append((question_text, options))
         else:
             i += 1
@@ -121,16 +119,24 @@ if st.session_state.page == "exam":
 
             if not st.session_state.exam_started:
                 if st.button("🚀 İmtahana Başla"):
-                    selected = random.sample(questions, min(50, len(questions))) if "50" in mode else questions
+                    if "50" in mode:
+    selected = random.sample(questions, min(50, len(questions)))
+    shuffle_questions = True
+else:
+    selected = questions
+    shuffle_questions = False
                     use_timer = "50" in mode
                     st.session_state.use_timer = use_timer
-
-                    shuffled_questions = []
-                    for q_text, opts in selected:
-                        correct = opts[0]
-                        shuffled = opts[:]
-                        random.shuffle(shuffled)
-                        shuffled_questions.append((q_text, shuffled, correct))
+shuffled_questions = []
+for q_text, opts in selected:
+    correct = opts[0]
+    if shuffle_questions:
+        random.shuffle(opts)  # sual və cavab hər ikisi qarışır
+    else:
+        opts = opts[:]  # sıra dəyişməsin
+        random.shuffle(opts)  # yalnız variantlar qarışsın
+    shuffled_questions.append((q_text, opts, correct))
+                    
 
                     st.session_state.exam_questions = shuffled_questions
                     st.session_state.exam_answers = [""] * len(shuffled_questions)
