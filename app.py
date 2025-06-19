@@ -131,10 +131,10 @@ shuffled_questions = []
 for q_text, opts in selected:
     correct = opts[0]
     if shuffle_questions:
-        random.shuffle(opts)  # sual və cavab hər ikisi qarışır
+        random.shuffle(opts) # sual və cavab hər ikisi qarışır
     else:
-        opts = opts[:]  # sıra dəyişməsin
-        random.shuffle(opts)  # yalnız variantlar qarışsın
+        opts = opts[:] # sıra dəyişməsin
+        random.shuffle(opts) # yalnız variantlar qarışsın
     shuffled_questions.append((q_text, opts, correct))
                     
 
