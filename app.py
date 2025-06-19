@@ -12,36 +12,35 @@ def full_text(paragraph):
 
 def parse_docx(file):
     doc = Document(file)
-    question_pattern = re.compile(r"^\s*\d+[.)]\s+")
-    option_pattern = re.compile(r"^\s*[A-Ea-e]\)?\s+(.*)")
+    paragraphs = [full_text(p) for p in doc.paragraphs if full_text(p)]
 
-    paragraphs = list(doc.paragraphs)
-    i = 0
+    question_pattern = re.compile(r"^\s*(\d+[.)]|Choose|Find|Select|Which|What|Who|When|Where|How)\s", re.IGNORECASE)
+    option_pattern = re.compile(r"^\s*[A-Ea-e][).]?\s+(.*)")
+
     question_blocks = []
-
+    i = 0
     while i < len(paragraphs):
-        text = full_text(paragraphs[i])
-        if question_pattern.match(text):
-            question_text = question_pattern.sub('', text)
+        line = paragraphs[i]
+        if question_pattern.match(line):
+            question_text = line.strip()
             i += 1
             options = []
             while i < len(paragraphs):
-                text = full_text(paragraphs[i])
-                match = option_pattern.match(text)
-                if match:
-                    options.append(match.group(1).strip())
-                    i += 1
-                elif text and not question_pattern.match(text) and len(options) < 5:
-                    options.append(text)
-                    i += 1
+                next_line = paragraphs[i]
+                if option_pattern.match(next_line):
+                    option_text = option_pattern.sub(r'\1', next_line).strip()
+                    options.append(option_text)
+                elif len(options) < 5:
+                    options.append(next_line.strip())
                 else:
                     break
-            if len(options) == 5:
+                i += 1
+            if len(options) >= 2:
                 question_blocks.append((question_text, options))
         else:
             i += 1
     return question_blocks
-
+    
 def create_shuffled_docx_and_answers(questions):
     new_doc = Document()
     answer_key = []
