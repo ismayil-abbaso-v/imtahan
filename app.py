@@ -8,61 +8,45 @@ from datetime import datetime, timedelta
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
 def parse_docx(file):
+    from docx import Document
+    import re
+
     doc = Document(file)
-    paragraphs = list(doc.paragraphs)
+    paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
     question_blocks = []
     i = 0
 
-    option_pattern = re.compile(r"^\s*[A-Ea-e][\).\s]+(.*)")
-    question_start_pattern = re.compile(r"^\s*(\d+)\s*[\).]\s*(.*)")
+    option_pattern = re.compile(r"^[A-Ea-e][)\.\s]+")  # A) və ya A. və s.
+    question_number_pattern = re.compile(r"^\d+[)\.\s]+")  # 123. və ya 123)
 
     while i < len(paragraphs):
-        q_lines = []
-        options = []
+        para = paragraphs[i]
+        question_match = question_number_pattern.match(para)
 
-        # Sual hissəsini topla
-        while i < len(paragraphs):
-            text = paragraphs[i].text.strip()
-            if not text:
-                i += 1
-                continue
-
-            match_q = question_start_pattern.match(text)
-            if match_q:
-                q_lines.append(match_q.group(2).strip())
-                i += 1
-                # Davamı varsa yığ
-                while i < len(paragraphs):
-                    line = paragraphs[i].text.strip()
-                    if not line:
-                        i += 1
-                        continue
-                    if option_pattern.match(line) or question_start_pattern.match(line):
-                        break
-                    q_lines.append(line)
-                    i += 1
-                break
-            else:
-                i += 1
-
-        # Variant hissəsini topla
-        while i < len(paragraphs):
-            line = paragraphs[i].text.strip()
-            if not line:
-                i += 1
-                continue
-            if question_start_pattern.match(line):
-                break
-            match = option_pattern.match(line)
-            if match:
-                options.append(match.group(1).strip())
-            else:
-                options.append(line)
+        if question_match:
+            question_lines = [para]
             i += 1
 
-        if q_lines and len(options) >= 2:
-            question_text = ' '.join(q_lines).strip()
-            question_blocks.append((question_text, options))
+            # Sualın davamı varsa, növbəti abzaslardan topla
+            while i < len(paragraphs):
+                if option_pattern.match(paragraphs[i]) or question_number_pattern.match(paragraphs[i]):
+                    break
+                question_lines.append(paragraphs[i])
+                i += 1
+
+            # Variantları topla
+            options = []
+            while i < len(paragraphs):
+                if question_number_pattern.match(paragraphs[i]):
+                    break
+                options.append(paragraphs[i])
+                i += 1
+
+            if len(options) >= 2:
+                question_text = ' '.join(question_lines)
+                question_blocks.append((question_text, options))
+        else:
+            i += 1
 
     return question_blocks
 
