@@ -16,12 +16,13 @@ def parse_docx(file):
     paragraphs = list(doc.paragraphs)
     i = 0
 
-    # Variant formatı: A), A., A ), a) və s. (yumşaq regex)
+    # Variant formatı: A), A., A ), a) və s.
     option_pattern = re.compile(r"^\s*[A-Ea-e][\).\s]+(.*)")
 
     # Sual nömrələmə üçün geniş regex (rəqəm + ')' və ya '.')
-    question_pattern = re.compile(r"^\s*(\d+)\s*[.)]?\s*(.*)")
+    question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
 
+    # Word avtomatik nömrələmə yoxlanması (istəyə bağlı)
     def is_numbered_paragraph(para):
         return para._p.pPr is not None and para._p.pPr.numPr is not None
 
@@ -34,6 +35,7 @@ def parse_docx(file):
 
         q_match = question_pattern.match(text)
         if q_match or is_numbered_paragraph(para):
+            # Sual mətni
             question_text = q_match.group(2).strip() if q_match else text.strip()
             i += 1
             options = []
@@ -44,15 +46,16 @@ def parse_docx(file):
                     i += 1
                     continue
 
+                # Əgər yeni sual başladısa, variant toplama bitir
                 if question_pattern.match(option_text):
-                    break  # Yeni sual başlanır, variant toplama bitir
+                    break
 
                 match = option_pattern.match(option_text)
                 if match:
                     options.append(match.group(1).strip())
                     i += 1
                 else:
-                    # Variant formatına uyğun gəlməyən sətir, amma 5-dən az variant varsa əlavə et
+                    # Variant 5-dən azdırsa sadə mətn variant kimi əlavə et
                     if len(options) < 5:
                         options.append(option_text)
                         i += 1
@@ -61,14 +64,10 @@ def parse_docx(file):
 
             if len(options) >= 2:
                 question_blocks.append((question_text, options))
-            else:
-                # Variant sayı azdır, sualı at
-                pass
         else:
             i += 1
 
     return question_blocks
-
 
 def create_shuffled_docx_and_answers(questions):
     new_doc = Document()
@@ -265,3 +264,6 @@ elif st.session_state.page == "ticket":
                 st.markdown("---")
                 if st.button("🔁 Yenidən Bilet Çək"):
                     st.session_state.ticket_questions = random.sample(questions, 5)
+
+
+
