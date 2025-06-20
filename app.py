@@ -16,10 +16,11 @@ def parse_docx(file):
     paragraphs = list(doc.paragraphs)
     i = 0
 
-    # Variant formatı: A), B), C), D), E) və ya A., B., C., D., E.
-    option_pattern = re.compile(r"^[A-Ea-e][\)\.]\s+(.*)")
+    # Variant formatı: A), A., A ), a) və s. (yumşaq regex)
+    option_pattern = re.compile(r"^\s*[A-Ea-e][\).\s]+(.*)")
 
-    question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
+    # Sual nömrələmə üçün geniş regex (rəqəm + ')' və ya '.')
+    question_pattern = re.compile(r"^\s*(\d+)\s*[.)]?\s*(.*)")
 
     def is_numbered_paragraph(para):
         return para._p.pPr is not None and para._p.pPr.numPr is not None
@@ -43,26 +44,26 @@ def parse_docx(file):
                     i += 1
                     continue
 
-                # Yeni sual başladığını aşkar et
                 if question_pattern.match(option_text):
-                    break
+                    break  # Yeni sual başlanır, variant toplama bitir
 
                 match = option_pattern.match(option_text)
                 if match:
                     options.append(match.group(1).strip())
                     i += 1
                 else:
-                    # Variant formatına uyğun gəlməyən sətri variant kimi qəbul etmirik və dayandırırıq
-                    break
-
-            # Konsolda variant sayını göstər
-            print(f"Sual: {question_text[:30]}..., Variant sayı: {len(options)}")
+                    # Variant formatına uyğun gəlməyən sətir, amma 5-dən az variant varsa əlavə et
+                    if len(options) < 5:
+                        options.append(option_text)
+                        i += 1
+                    else:
+                        break
 
             if len(options) >= 2:
                 question_blocks.append((question_text, options))
             else:
-                print("→ Variant sayı 2-dən az olduğu üçün sual atıldı.")
-
+                # Variant sayı azdır, sualı at
+                pass
         else:
             i += 1
 
