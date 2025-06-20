@@ -11,13 +11,16 @@ def full_text(paragraph):
     return ''.join(run.text for run in paragraph.runs).strip()
 
 def parse_docx(file):
+    import re
+    from docx import Document
+
     doc = Document(file)
-    question_blocks = []
     paragraphs = list(doc.paragraphs)
+    question_blocks = []
     i = 0
 
-    question_pattern = re.compile(r"^\s*(\d+)[.)]\s*(.*)")
-    option_pattern = re.compile(r"^\s*[A-Ea-e][\).\s]+(.*)")
+    q_pattern = re.compile(r"^\s*(\d+)[.)]\s*(.*)")
+    opt_pattern = re.compile(r"^\s*[A-Ea-e][\).\s]+(.*)")
 
     while i < len(paragraphs):
         text = ''.join(run.text for run in paragraphs[i].runs).strip()
@@ -25,30 +28,26 @@ def parse_docx(file):
             i += 1
             continue
 
-        q_match = question_pattern.match(text)
+        q_match = q_pattern.match(text)
         if q_match:
             question_text = q_match.group(2).strip()
             i += 1
             options = []
 
-            # Variantları topla
             while i < len(paragraphs):
                 opt_text = ''.join(run.text for run in paragraphs[i].runs).strip()
-
                 if not opt_text:
                     i += 1
                     continue
-
-                # Yeni sual başladısa, variant toplama bitir
-                if question_pattern.match(opt_text):
+                if q_pattern.match(opt_text):  # Yeni sual nömrəsi görünsə
                     break
-
-                # Variant formatında deyilsə, variant toplama bitir
-                if not option_pattern.match(opt_text):
+                opt_match = opt_pattern.match(opt_text)
+                if not opt_match:  # Variant formatında deyilsə dayandır
                     break
-
-                match = option_pattern.match(opt_text)
-                options.append(match.group(1).strip())
+                options.append(opt_match.group(1).strip())
+                if len(options) == 5:  # Maksimum 5 variant
+                    i += 1
+                    break
                 i += 1
 
             if len(options) >= 2:
@@ -57,6 +56,7 @@ def parse_docx(file):
             i += 1
 
     return question_blocks
+
 
 
 
