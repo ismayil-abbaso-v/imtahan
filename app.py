@@ -16,10 +16,10 @@ def parse_docx(file):
     paragraphs = list(doc.paragraphs)
     i = 0
 
-    # Variant formatı: Yalnız A) və ya A. və boşluq olmalıdır, başqa şeylər yox
+    # Variant formatı: A), A., A ), a) və s.
     option_pattern = re.compile(r"^[A-Ea-e][\)\.]\s+(.*)")
 
-    # Sual nömrələmə üçün regex (rəqəm + ')' və ya '.')
+    # Sual nömrələmə üçün geniş regex (rəqəm + ')' və ya '.')
     question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
 
     # Word avtomatik nömrələmə yoxlanması (istəyə bağlı)
@@ -35,6 +35,7 @@ def parse_docx(file):
 
         q_match = question_pattern.match(text)
         if q_match or is_numbered_paragraph(para):
+            # Sual mətni
             question_text = q_match.group(2).strip() if q_match else text.strip()
             i += 1
             options = []
@@ -45,7 +46,7 @@ def parse_docx(file):
                     i += 1
                     continue
 
-                # Yeni sual başladısa, variant toplama bitir
+                # Əgər yeni sual başladısa, variant toplama bitir
                 if question_pattern.match(option_text):
                     break
 
@@ -54,8 +55,12 @@ def parse_docx(file):
                     options.append(match.group(1).strip())
                     i += 1
                 else:
-                    # Variant 5-dən azdırsa, variant kimi qəbul etmirik, ona görə dayandırırıq
-                    break
+                    # Variant 5-dən azdırsa sadə mətn variant kimi əlavə et
+                    if len(options) < 5:
+                        options.append(option_text)
+                        i += 1
+                    else:
+                        break
 
             if len(options) >= 2:
                 question_blocks.append((question_text, options))
@@ -63,7 +68,6 @@ def parse_docx(file):
             i += 1
 
     return question_blocks
-
 
 def create_shuffled_docx_and_answers(questions):
     new_doc = Document()
