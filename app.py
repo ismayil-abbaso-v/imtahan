@@ -12,34 +12,44 @@ def full_text(paragraph):
 
 def parse_docx(file):
     doc = Document(file)
-    question_pattern = re.compile(r"^\s*\d+[.)]\s+")
     option_pattern = re.compile(r"^\s*[A-Ea-e]\)?\s+(.*)")
 
+    question_blocks = []
     paragraphs = list(doc.paragraphs)
     i = 0
-    question_blocks = []
 
     while i < len(paragraphs):
-        text = full_text(paragraphs[i])
-        if question_pattern.match(text):
-            question_text = question_pattern.sub('', text)
+        para = paragraphs[i]
+        text = full_text(para)
+
+        # Sualın başlandığını tapmaq üçün: ya sadə regex-lə nömrələnmiş, ya da avtomatik siyahı
+        is_numbered = para.style.name.startswith('List') or para._p.pPr is not None and para._p.pPr.numPr is not None
+        if re.match(r"^\s*\d+[.)]\s+", text) or is_numbered:
+            # Avtomatik nömrə varsa, onu kəsib mətni götür
+            if re.match(r"^\s*\d+[.)]\s+", text):
+                question_text = re.sub(r"^\s*\d+[.)]\s+", "", text).strip()
+            else:
+                question_text = text.strip()
             i += 1
             options = []
+
             while i < len(paragraphs):
-                text = full_text(paragraphs[i])
-                match = option_pattern.match(text)
+                next_text = full_text(paragraphs[i])
+                match = option_pattern.match(next_text)
                 if match:
                     options.append(match.group(1).strip())
                     i += 1
-                elif text and not question_pattern.match(text) and len(options) < 5:
-                    options.append(text)
+                elif next_text and len(options) < 5:
+                    options.append(next_text.strip())
                     i += 1
                 else:
                     break
+
             if len(options) == 5:
                 question_blocks.append((question_text, options))
         else:
             i += 1
+
     return question_blocks
 
 def create_shuffled_docx_and_answers(questions):
