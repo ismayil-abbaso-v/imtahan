@@ -7,69 +7,65 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
-def full_text(paragraph):
-    return ''.join(run.text for run in paragraph.runs).strip()
-
 def parse_docx(file):
     doc = Document(file)
     paragraphs = list(doc.paragraphs)
     question_blocks = []
     i = 0
 
-    # Variant formatı: A), A., A ), a) və s.
     option_pattern = re.compile(r"^\s*[A-Ea-e][\).\s]+(.*)")
-    question_start_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
+    question_start_pattern = re.compile(r"^\s*(\d+)\s*[\).]\s*(.*)")
 
     while i < len(paragraphs):
         q_lines = []
         options = []
-        correct_found = False
 
-        para_text = paragraphs[i].text.strip()
-        if not para_text:
-            i += 1
-            continue
+        # Sual hissəsini topla
+        while i < len(paragraphs):
+            text = paragraphs[i].text.strip()
+            if not text:
+                i += 1
+                continue
 
-        q_match = question_start_pattern.match(para_text)
-        if q_match:
-            q_lines.append(q_match.group(2).strip())
-            i += 1
-
-            # Davamı olan sətirləri yığ
-            while i < len(paragraphs):
-                line = paragraphs[i].text.strip()
-                if option_pattern.match(line):
-                    break
-                if line:
+            match_q = question_start_pattern.match(text)
+            if match_q:
+                q_lines.append(match_q.group(2).strip())
+                i += 1
+                # Davamı varsa yığ
+                while i < len(paragraphs):
+                    line = paragraphs[i].text.strip()
+                    if not line:
+                        i += 1
+                        continue
+                    if option_pattern.match(line) or question_start_pattern.match(line):
+                        break
                     q_lines.append(line)
+                    i += 1
+                break
+            else:
                 i += 1
 
-            # Variantları oxu
-            while i < len(paragraphs):
-                line = paragraphs[i].text.strip()
-                if not line:
-                    i += 1
-                    continue
-                if question_start_pattern.match(line):
-                    break
-                match = option_pattern.match(line)
-                if match:
-                    options.append(match.group(1).strip())
-                    i += 1
-                else:
-                    if len(options) < 5:
-                        options.append(line.strip())
-                        i += 1
-                    else:
-                        break
-
-            if len(options) >= 2:
-                question_text = ' '.join(q_lines).strip()
-                question_blocks.append((question_text, options))
-        else:
+        # Variant hissəsini topla
+        while i < len(paragraphs):
+            line = paragraphs[i].text.strip()
+            if not line:
+                i += 1
+                continue
+            if question_start_pattern.match(line):
+                break
+            match = option_pattern.match(line)
+            if match:
+                options.append(match.group(1).strip())
+            else:
+                options.append(line)
             i += 1
 
+        if q_lines and len(options) >= 2:
+            question_text = ' '.join(q_lines).strip()
+            question_blocks.append((question_text, options))
+
     return question_blocks
+
 
 def create_shuffled_docx_and_answers(questions):
     new_doc = Document()
