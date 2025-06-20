@@ -16,13 +16,11 @@ def parse_docx(file):
     paragraphs = list(doc.paragraphs)
     i = 0
 
-    # Variant formatı: A), A., A ), a) və s.
+    # Variant formatı: A), B), C), D), E) və ya A., B., C., D., E.
     option_pattern = re.compile(r"^[A-Ea-e][\)\.]\s+(.*)")
 
-    # Sual nömrələmə üçün geniş regex (rəqəm + ')' və ya '.')
     question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
 
-    # Word avtomatik nömrələmə yoxlanması (istəyə bağlı)
     def is_numbered_paragraph(para):
         return para._p.pPr is not None and para._p.pPr.numPr is not None
 
@@ -35,7 +33,6 @@ def parse_docx(file):
 
         q_match = question_pattern.match(text)
         if q_match or is_numbered_paragraph(para):
-            # Sual mətni
             question_text = q_match.group(2).strip() if q_match else text.strip()
             i += 1
             options = []
@@ -46,7 +43,7 @@ def parse_docx(file):
                     i += 1
                     continue
 
-                # Əgər yeni sual başladısa, variant toplama bitir
+                # Yeni sual başladığını aşkar et
                 if question_pattern.match(option_text):
                     break
 
@@ -55,19 +52,22 @@ def parse_docx(file):
                     options.append(match.group(1).strip())
                     i += 1
                 else:
-                    # Variant 5-dən azdırsa sadə mətn variant kimi əlavə et
-                    if len(options) < 5:
-                        options.append(option_text)
-                        i += 1
-                    else:
-                        break
+                    # Variant formatına uyğun gəlməyən sətri variant kimi qəbul etmirik və dayandırırıq
+                    break
+
+            # Konsolda variant sayını göstər
+            print(f"Sual: {question_text[:30]}..., Variant sayı: {len(options)}")
 
             if len(options) >= 2:
                 question_blocks.append((question_text, options))
+            else:
+                print("→ Variant sayı 2-dən az olduğu üçün sual atıldı.")
+
         else:
             i += 1
 
     return question_blocks
+
 
 def create_shuffled_docx_and_answers(questions):
     new_doc = Document()
