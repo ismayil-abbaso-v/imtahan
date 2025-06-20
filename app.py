@@ -12,30 +12,55 @@ def full_text(paragraph):
 
 def parse_docx(file):
     doc = Document(file)
-    question_pattern = re.compile(r"^\s*\d+[.)]?\s+")
-    option_pattern = re.compile(r"^\s*[A-Ea-e][).]?\s*(.+)")
-
-    paragraphs = [full_text(p) for p in doc.paragraphs if full_text(p)]
-    i = 0
     question_blocks = []
+    paragraphs = list(doc.paragraphs)
+    i = 0
+
+    # A), A., A ) və s. formatlar üçün cavab regex
+    option_pattern = re.compile(r"^\s*[A-Ea-e][\).]?\s+(.*)")
+
+    def is_numbered_paragraph(para):
+        """Word-də avtomatik nömrələnmiş paraqrafdırsa TRUE qaytarır"""
+        return para._p.pPr is not None and para._p.pPr.numPr is not None
 
     while i < len(paragraphs):
-        text = paragraphs[i]
-        if question_pattern.match(text):
-            question_text = question_pattern.sub('', text)
+        para = paragraphs[i]
+        text = full_text(para)
+
+        # Sual tapılıbsa: ya regex-lə, ya da avtomatik nömrələnmiş paraqrafsa
+        if re.match(r"^\s*\d+[.)]\s+", text) or is_numbered_paragraph(para):
+            # Əgər regex-lə uyğun gəlirsə → nömrəni sil
+            if re.match(r"^\s*\d+[.)]\s+", text):
+                question_text = re.sub(r"^\s*\d+[.)]\s+", "", text).strip()
+            else:
+                question_text = text.strip()
+
             i += 1
             options = []
-            while i < len(paragraphs) and len(options) < 5:
-                match = option_pattern.match(paragraphs[i])
+
+            # Növbəti paraqraflar cavab variantlarıdır
+            while i < len(paragraphs):
+                option_text = full_text(paragraphs[i])
+                if not option_text:
+                    i += 1
+                    continue
+
+                match = option_pattern.match(option_text)
                 if match:
                     options.append(match.group(1).strip())
+                    i += 1
+                elif len(options) < 5:
+                    # Bəzən cavab variantları A) olmadan sadəcə mətn şəklində yazılır
+                    options.append(option_text.strip())
+                    i += 1
                 else:
-                    options.append(paragraphs[i].strip())
-                i += 1
+                    break
+
             if len(options) == 5:
                 question_blocks.append((question_text, options))
         else:
             i += 1
+
     return question_blocks
 
 
