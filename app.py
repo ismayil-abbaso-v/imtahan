@@ -7,67 +7,59 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
-def parse_docx(file):
-    from docx import Document
-    import re
+@st.cache_data
 
+def parse_docx(file):
     doc = Document(file)
-    paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
     question_blocks = []
+    paragraphs = list(doc.paragraphs)
     i = 0
 
-    option_pattern = re.compile(r"^[A-Ea-e][)\.\s]+")  # A) və ya A. və s.
-    question_number_pattern = re.compile(r"^\d+[)\.\s]+")  # 123. və ya 123)
+    option_pattern = re.compile(r"^\s*[A-Ea-e][\)\.\:\-\s]+(.*)")
+    question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
+
+    def is_numbered_paragraph(para):
+        return para._p.pPr is not None and para._p.pPr.numPr is not None
 
     while i < len(paragraphs):
         para = paragraphs[i]
-        question_match = question_number_pattern.match(para)
-
-        if question_match:
-            question_lines = [para]
+        text = ''.join(run.text for run in para.runs).strip()
+        if not text:
             i += 1
+            continue
 
-            # Sualın davamı varsa, növbəti abzaslardan topla
-            while i < len(paragraphs):
-                if option_pattern.match(paragraphs[i]) or question_number_pattern.match(paragraphs[i]):
-                    break
-                question_lines.append(paragraphs[i])
-                i += 1
-
-            # Variantları topla
+        q_match = question_pattern.match(text)
+        if q_match or is_numbered_paragraph(para):
+            question_text = q_match.group(2).strip() if q_match else text.strip()
+            i += 1
             options = []
+
             while i < len(paragraphs):
-                if question_number_pattern.match(paragraphs[i]):
+                option_text = ''.join(run.text for run in paragraphs[i].runs).strip()
+                if not option_text:
+                    i += 1
+                    continue
+                if question_pattern.match(option_text):
                     break
-                options.append(paragraphs[i])
-                i += 1
+                match = option_pattern.match(option_text)
+                if match:
+                    options.append(match.group(1).strip())
+                    i += 1
+                else:
+                    if len(options) < 5:
+                        options.append(option_text)
+                        i += 1
+                    else:
+                        break
 
             if len(options) >= 2:
-                question_text = ' '.join(question_lines)
                 question_blocks.append((question_text, options))
         else:
             i += 1
 
     return question_blocks
 
-
-def create_shuffled_docx_and_answers(questions):
-    new_doc = Document()
-    answer_key = []
-
-    for idx, (question, options) in enumerate(questions, start=1):
-        new_doc.add_paragraph(f"{idx}) {question}")
-        correct_answer = options[0]
-        shuffled_options = options[:]
-        random.shuffle(shuffled_options)
-
-        for j, option in enumerate(shuffled_options):
-            letter = chr(ord('A') + j)
-            new_doc.add_paragraph(f"{letter}) {option}")
-            if option.strip() == correct_answer.strip():
-                answer_key.append(f"{idx}) {letter}")
-
-    return new_doc, answer_key
+@st.cache_data
 
 def parse_open_questions(file):
     doc = Document(file)
