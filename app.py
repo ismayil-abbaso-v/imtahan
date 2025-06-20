@@ -16,8 +16,11 @@ def parse_docx(file):
     paragraphs = list(doc.paragraphs)
     i = 0
 
-    # A), A., A ) və s. formatlar üçün cavab regex
-    option_pattern = re.compile(r"^\s*[A-Ea-e][\).]?\s+(.*)")
+    # Cavab variantlarının formatı: A), A., A ), a) və s.
+    option_pattern = re.compile(r"^\s*[A-Ea-e][\).\s]+(.*)")
+
+    # Sual nömrələmə nümunələri üçün genişləndirilmiş regex:
+    question_pattern = re.compile(r"^\s*\d+\s*[.)]?\s*(.*)")
 
     def is_numbered_paragraph(para):
         """Word-də avtomatik nömrələnmiş paraqrafdırsa TRUE qaytarır"""
@@ -26,37 +29,40 @@ def parse_docx(file):
     while i < len(paragraphs):
         para = paragraphs[i]
         text = full_text(para)
+        if not text:
+            i += 1
+            continue
 
-        # Sual tapılıbsa: ya regex-lə, ya da avtomatik nömrələnmiş paraqrafsa
-        if re.match(r"^\s*\d+[.)]\s+", text) or is_numbered_paragraph(para):
-            # Əgər regex-lə uyğun gəlirsə → nömrəni sil
-            if re.match(r"^\s*\d+[.)]\s+", text):
-                question_text = re.sub(r"^\s*\d+[.)]\s+", "", text).strip()
-            else:
-                question_text = text.strip()
-
+        # Sualın başlanğıcı nömrə ilə başlayırsa (nömrə+ ')' və ya '.' arası boşluq ola bilər)
+        q_match = question_pattern.match(text)
+        if q_match or is_numbered_paragraph(para):
+            # Sual mətni nömrədən sonra gələn hissədir
+            question_text = q_match.group(1).strip() if q_match else text.strip()
             i += 1
             options = []
 
-            # Növbəti paraqraflar cavab variantlarıdır
+            # Variantları topla
             while i < len(paragraphs):
                 option_text = full_text(paragraphs[i])
                 if not option_text:
                     i += 1
                     continue
 
+                # Variant regex-ə uyğun gəlirsə variantdır
                 match = option_pattern.match(option_text)
                 if match:
                     options.append(match.group(1).strip())
                     i += 1
-                elif len(options) < 5:
-                    # Bəzən cavab variantları A) olmadan sadəcə mətn şəklində yazılır
-                    options.append(option_text.strip())
-                    i += 1
                 else:
-                    break
+                    # Əgər 5 variantdan az varsa, variant kimi qəbul et, yoxsa dayandır
+                    if len(options) < 5:
+                        options.append(option_text.strip())
+                        i += 1
+                    else:
+                        break
 
-            if len(options) == 5:
+            # Yalnız 2 və ya daha çox variant varsa, sual kimi saxla (5 olmaya da bilər, amma minimum 2 variant tövsiyə olunur)
+            if len(options) >= 2:
                 question_blocks.append((question_text, options))
         else:
             i += 1
