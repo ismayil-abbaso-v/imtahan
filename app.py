@@ -7,8 +7,7 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
-def full_text(paragraph):
-    return ''.join(run.text for run in paragraph.runs).strip()
+@st.cache_data
 
 def parse_docx(file):
     doc = Document(file)
@@ -16,13 +15,9 @@ def parse_docx(file):
     paragraphs = list(doc.paragraphs)
     i = 0
 
-    # Variant formatı: A), A., A ), a) və s.
-    option_pattern = re.compile(r"^\s*[A-Ea-e][\).\s]+(.*)")
-
-    # Sual nömrələmə üçün geniş regex (rəqəm + ')' və ya '.')
+    option_pattern = re.compile(r"^\s*[A-Ea-e][\)\.\:\-\s]+(.*)")
     question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
 
-    # Word avtomatik nömrələmə yoxlanması (istəyə bağlı)
     def is_numbered_paragraph(para):
         return para._p.pPr is not None and para._p.pPr.numPr is not None
 
@@ -35,7 +30,6 @@ def parse_docx(file):
 
         q_match = question_pattern.match(text)
         if q_match or is_numbered_paragraph(para):
-            # Sual mətni
             question_text = q_match.group(2).strip() if q_match else text.strip()
             i += 1
             options = []
@@ -45,17 +39,13 @@ def parse_docx(file):
                 if not option_text:
                     i += 1
                     continue
-
-                # Əgər yeni sual başladısa, variant toplama bitir
                 if question_pattern.match(option_text):
                     break
-
                 match = option_pattern.match(option_text)
                 if match:
                     options.append(match.group(1).strip())
                     i += 1
                 else:
-                    # Variant 5-dən azdırsa sadə mətn variant kimi əlavə et
                     if len(options) < 5:
                         options.append(option_text)
                         i += 1
@@ -68,6 +58,18 @@ def parse_docx(file):
             i += 1
 
     return question_blocks
+
+@st.cache_data
+
+def parse_open_questions(file):
+    doc = Document(file)
+    paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+    questions = []
+    for p in paragraphs:
+        p = re.sub(r"^\s*\d+\s*[.)]?\s*", "", p)
+        if p:
+            questions.append(p)
+    return questions
 
 def create_shuffled_docx_and_answers(questions):
     new_doc = Document()
@@ -86,16 +88,6 @@ def create_shuffled_docx_and_answers(questions):
                 answer_key.append(f"{idx}) {letter}")
 
     return new_doc, answer_key
-
-def parse_open_questions(file):
-    doc = Document(file)
-    paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
-    questions = []
-    for p in paragraphs:
-        p = re.sub(r"^\s*\d+\s*[.)]?\s*", "", p)
-        if p:
-            questions.append(p)
-    return questions
 
 if "page" not in st.session_state:
     st.session_state.page = "home"
@@ -127,7 +119,7 @@ else:
     menu = st.sidebar.radio("🔁 Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı"],
                             index=["exam", "shuffle", "ticket"].index(st.session_state.page))
     st.session_state.page = {"📝 Özünü İmtahan Et": "exam", "🎲 Sualları Qarışdır": "shuffle", "🎫 Bilet İmtahanı": "ticket"}[menu]
-   
+
 if st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi ")
     uploaded_file = st.file_uploader("📤 İmtahan üçün Word (.docx) faylını seçin", type="docx")
@@ -161,7 +153,7 @@ if st.session_state.page == "exam":
                         shuffled_questions.append((q_text, shuffled, correct))
 
                     st.session_state.exam_questions = shuffled_questions
-                    st.session_state.exam_answers = [""] * len(shuffled_questions)
+                    st.session_state.exam_answers = [None] * len(shuffled_questions)
                     st.session_state.exam_start_time = datetime.now()
                     st.session_state.exam_started = True
                     st.rerun()
@@ -182,13 +174,14 @@ if st.session_state.page == "exam":
                 else:
                     st.info("ℹ️ Bu rejimdə zaman məhdudiyyəti yoxdur.")
 
-                for i, (qtext, options, _) in enumerate(st.session_state.exam_questions):
-                    st.markdown(f"**{i+1}) {qtext}**")
-                    st.session_state.exam_answers[i] = st.radio(label="", options=options, key=f"q_{i}", label_visibility="collapsed")
-
-                if st.button("📤 İmtahanı Bitir"):
-                    st.session_state.exam_submitted = True
-                    st.rerun()
+                with st.form("exam_form"):
+                    for i, (qtext, options, _) in enumerate(st.session_state.exam_questions):
+                        st.markdown(f"**{i+1}) {qtext}**")
+                        st.session_state.exam_answers[i] = st.radio("", options, key=f"q_{i}", label_visibility="collapsed")
+                    submitted = st.form_submit_button("📤 İmtahanı Bitir")
+                    if submitted:
+                        st.session_state.exam_submitted = True
+                        st.rerun()
 
             elif st.session_state.exam_submitted:
                 st.success("🎉 İmtahan tamamlandı!")
@@ -207,9 +200,10 @@ if st.session_state.page == "exam":
                         st.markdown(f"**{i+1}) {qtext}**\n• Sənin cavabın: {ua}\n• Doğru cavab: {ca} → {status}")
 
                 if st.button("🔁 Yenidən Başla"):
-                    for key in ["exam_questions", "exam_answers", "exam_started", "exam_submitted", "exam_start_time", "use_timer"]:
-                        if key in st.session_state:
-                            del st.session_state[key]
+                    keys_to_clear = [k for k in st.session_state if k.startswith("q_") or k in [
+                        "exam_questions", "exam_answers", "exam_started", "exam_submitted", "exam_start_time", "use_timer"]]
+                    for key in keys_to_clear:
+                        st.session_state.pop(key)
                     st.rerun()
 
 elif st.session_state.page == "shuffle":
@@ -264,6 +258,3 @@ elif st.session_state.page == "ticket":
                 st.markdown("---")
                 if st.button("🔁 Yenidən Bilet Çək"):
                     st.session_state.ticket_questions = random.sample(questions, 5)
-
-
-
