@@ -42,10 +42,11 @@ def parse_docx(file):
                     i += 1
                     continue
 
+                # Yeni sualın başlanğıcıdırsa, variant toplama bitir
                 if question_pattern.match(next_text):
-                    # Yeni sual tapıldı, variant toplama bitdi
                     break
 
+                # Variant kimi qəbul et
                 match = option_pattern.match(next_text)
                 if match:
                     options.append(match.group(1).strip())
@@ -54,20 +55,17 @@ def parse_docx(file):
 
                 i += 1
 
-                # Maksimum 5 variant varsa, variant toplama bitdi
-                if len(options) >= 5:
-                    break
-
             # Minimum 2 variant varsa sual kimi əlavə et
             if len(options) >= 2:
                 question_blocks.append((question_text, options))
             else:
-                # Variant azdırsa, sual əlavə olunmur
+                # Variant azdırsa sual əlavə etmə
                 pass
         else:
             i += 1
 
     return question_blocks
+
 
 
 def create_shuffled_docx_and_answers(questions):
