@@ -12,58 +12,58 @@ def full_text(paragraph):
 
 def parse_docx(file):
     doc = Document(file)
-    question_blocks = []
     paragraphs = list(doc.paragraphs)
-    i = 0
+    question_blocks = []
 
-    # Cavab variantlarının formatı: A), A., A ), a) və s.
     option_pattern = re.compile(r"^\s*[A-Ea-e][\).\s]+(.*)")
+    question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
 
-    # Sual nömrələmə nümunələri üçün genişləndirilmiş regex:
-    question_pattern = re.compile(r"^\s*\d+\s*[.)]?\s*(.*)")
+    i = 0
+    total_paragraphs = len(paragraphs)
 
-    def is_numbered_paragraph(para):
-        """Word-də avtomatik nömrələnmiş paraqrafdırsa TRUE qaytarır"""
-        return para._p.pPr is not None and para._p.pPr.numPr is not None
-
-    while i < len(paragraphs):
+    while i < total_paragraphs:
         para = paragraphs[i]
         text = full_text(para)
         if not text:
             i += 1
             continue
 
-        # Sualın başlanğıcı nömrə ilə başlayırsa (nömrə+ ')' və ya '.' arası boşluq ola bilər)
         q_match = question_pattern.match(text)
-        if q_match or is_numbered_paragraph(para):
-            # Sual mətni nömrədən sonra gələn hissədir
-            question_text = q_match.group(1).strip() if q_match else text.strip()
+        if q_match:
+            question_num = int(q_match.group(1))
+            question_text = q_match.group(2).strip()
+
             i += 1
             options = []
 
-            # Variantları topla
-            while i < len(paragraphs):
-                option_text = full_text(paragraphs[i])
-                if not option_text:
+            while i < total_paragraphs:
+                next_text = full_text(paragraphs[i]).strip()
+                if not next_text:
                     i += 1
                     continue
 
-                # Variant regex-ə uyğun gəlirsə variantdır
-                match = option_pattern.match(option_text)
+                if question_pattern.match(next_text):
+                    # Yeni sual tapıldı, variant toplama bitdi
+                    break
+
+                match = option_pattern.match(next_text)
                 if match:
                     options.append(match.group(1).strip())
-                    i += 1
                 else:
-                    # Əgər 5 variantdan az varsa, variant kimi qəbul et, yoxsa dayandır
-                    if len(options) < 5:
-                        options.append(option_text.strip())
-                        i += 1
-                    else:
-                        break
+                    options.append(next_text)
 
-            # Yalnız 2 və ya daha çox variant varsa, sual kimi saxla (5 olmaya da bilər, amma minimum 2 variant tövsiyə olunur)
+                i += 1
+
+                # Maksimum 5 variant varsa, variant toplama bitdi
+                if len(options) >= 5:
+                    break
+
+            # Minimum 2 variant varsa sual kimi əlavə et
             if len(options) >= 2:
                 question_blocks.append((question_text, options))
+            else:
+                # Variant azdırsa, sual əlavə olunmur
+                pass
         else:
             i += 1
 
