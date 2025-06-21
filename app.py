@@ -9,15 +9,14 @@ st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
 @st.cache_data
 
-@st.cache_data
 def parse_docx(file):
     doc = Document(file)
     question_blocks = []
     paragraphs = list(doc.paragraphs)
     i = 0
 
-    option_pattern = re.compile(r"^\s*[A-Ea-e][\)\.\:\-]\s+(.+)$")
-    question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.+)$")
+    option_pattern = re.compile(r"^\s*[A-Ea-e][\)\.\:\-\s]+(.*)")
+    question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
 
     def is_numbered_paragraph(para):
         return para._p.pPr is not None and para._p.pPr.numPr is not None
@@ -33,35 +32,28 @@ def parse_docx(file):
         if q_match or is_numbered_paragraph(para):
             question_text = q_match.group(2).strip() if q_match else text.strip()
             i += 1
-
-            # Sualın davamı variant başlanana qədər yığılır
-            while i < len(paragraphs):
-                next_text = ''.join(run.text for run in paragraphs[i].runs).strip()
-                if not next_text:
-                    i += 1
-                    continue
-                if option_pattern.match(next_text) or question_pattern.match(next_text):
-                    break
-                question_text += " " + next_text
-                i += 1
-
             options = []
+
             while i < len(paragraphs):
-                opt_text = ''.join(run.text for run in paragraphs[i].runs).strip()
-                if not opt_text:
+                option_text = ''.join(run.text for run in paragraphs[i].runs).strip()
+                if not option_text:
                     i += 1
                     continue
-                if question_pattern.match(opt_text):
+                if question_pattern.match(option_text):
                     break
-                match = option_pattern.match(opt_text)
+                match = option_pattern.match(option_text)
                 if match:
                     options.append(match.group(1).strip())
                     i += 1
                 else:
-                    break
+                    if len(options) < 5:
+                        options.append(option_text)
+                        i += 1
+                    else:
+                        break
 
             if len(options) >= 2:
-                question_blocks.append((question_text.strip(), options))
+                question_blocks.append((question_text, options))
         else:
             i += 1
 
