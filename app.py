@@ -95,7 +95,7 @@ if "page" not in st.session_state:
 if st.session_state.page == "home":
     st.title("📝 Testləri Qarışdır və Biliklərini Yoxla!")
     st.markdown("Zəhmət olmasa bir rejim seçin:")
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         if st.button("📝 Özünü imtahan et"):
             st.session_state.page = "exam"
@@ -108,7 +108,10 @@ if st.session_state.page == "home":
         if st.button("🎫 Bilet İmtahanı"):
             st.session_state.page = "ticket"
             st.rerun()
-
+    with col4:
+        if st.sidebar.button("ℹ️ İstifadə Qaydaları"):
+            st.session_state.page = "help"
+            st.rerun()
 else:
     st.sidebar.title("⚙️ Menyu")
     if st.sidebar.button("🏠 Ana Səhifə"):
@@ -117,10 +120,16 @@ else:
         st.session_state.page = "home"
         st.rerun()
 
-    menu = st.sidebar.radio("🔁 Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı"],
-                            index=["exam", "shuffle", "ticket"].index(st.session_state.page))
-    st.session_state.page = {"📝 Özünü İmtahan Et": "exam", "🎲 Sualları Qarışdır": "shuffle", "🎫 Bilet İmtahanı": "ticket"}[menu]
-
+    menu = st.sidebar.radio("🔁 Rejimi dəyiş:", 
+    ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı", "ℹ️ İstifadə Qaydaları"],
+    index=["exam", "shuffle", "ticket", "help"].index(st.session_state.page)
+)
+st.session_state.page = {
+    "📝 Özünü İmtahan Et": "exam",
+    "🎲 Sualları Qarışdır": "shuffle",
+    "🎫 Bilet İmtahanı": "ticket",
+    "ℹ️ İstifadə Qaydaları": "help"
+}[menu]
 
 if st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi ")
@@ -291,6 +300,42 @@ elif st.session_state.page == "ticket":
                 st.success("✅ Hazır bilet sualları:")
                 for i, q in enumerate(st.session_state.ticket_questions, 1):
                     st.markdown(f"<p style='font-size:16px;'><strong>{i})</strong> {q}</p>", unsafe_allow_html=True)
+elif st.session_state.page == "help":
+    st.title("ℹ️ İstifadə Qaydaları və Yardım")
+    st.markdown("""
+**Xoş gəlmisiniz!** Bu proqram vasitəsilə müxtəlif formatlarda imtahan suallarını sınaqdan keçirə və özünüzü yoxlaya bilərsiniz. Aşağıda əsas funksiyalar və onların necə işlədiyini görəcəksiniz:
+
+---
+
+### 📝 Özünü İmtahan Et
+- Word (.docx) faylını yükləyin (test sualları formatında).
+- 3 rejim mövcuddur:
+  - **50 təsadüfi sual** — 60 dəqiqəlik zamanla.
+  - **Bütün suallar** — limitsiz zamanla.
+  - **Aralıqdan seçilmiş suallar** — müəyyən hissəni seçərək sınaq keçə bilərsiniz.
+
+### 🎲 Sualları Qarışdır
+- Word faylından suallar alınır və variantları qarışdırılır.
+- Qarışdırılmış yeni sənəd və cavab açarı (.txt) yükləmək mümkündür.
+
+### 🎫 Bilet İmtahanı
+- Açıq sualları olan fayl (.docx) yükləyin.
+- Sistem təsadüfi 5 sualı seçir və sizə təqdim edir.
+
+---
+
+### ⚠️ Əgər:
+- **Fayl yüklədikdən sonra sual tapılmırsa**, onun strukturuna baxın: suallar 1) ..., variantlar A)... B)... şəklində olmalıdır.
+- **Aralıq seçimi rejimi ekranda qalırsa və başlamırsa**, düyməni kliklədikdən sonra sualların mövcudluğundan əmin olun.
+- **Vaxt məhdudiyyətli rejimdə vaxt bitdikdə avtomatik nəticələr göstərilir.**
+
+---
+
+### 💡 Faydalı Məlumat:
+- Sual faylınızın formatı uyğun deyilsə, istədiyiniz nümunəyə uyğunlaşdırmaq üçün bizdən yardım ala bilərsiniz.
+- Hər hansı texniki problem və ya sual üçün adminlə əlaqə saxlayın.
+""")
+
 
                 st.markdown("---")
                 if st.button("🔁 Yenidən Bilet Çək"):
