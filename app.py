@@ -95,7 +95,7 @@ if "page" not in st.session_state:
 if st.session_state.page == "home":
     st.title("📝 Testləri Qarışdır və Biliklərini Yoxla!")
     st.markdown("Zəhmət olmasa bir rejim seçin:")
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, = st.columns(3)
     with col1:
         if st.button("📝 Özünü imtahan et"):
             st.session_state.page = "exam"
@@ -108,7 +108,7 @@ if st.session_state.page == "home":
         if st.button("🎫 Bilet İmtahanı"):
             st.session_state.page = "ticket"
             st.rerun()
-    with col4:
+    with :
         if st.sidebar.button("ℹ️ İstifadə Qaydaları"):
             st.session_state.page = "help"
             st.rerun()
