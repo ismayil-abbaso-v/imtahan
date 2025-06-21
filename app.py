@@ -301,35 +301,59 @@ elif st.session_state.page == "ticket":
 elif st.session_state.page == "help":
     st.title("ℹ️ İstifadə Qaydaları və Yardım")
     st.markdown("""
-**Xoş gəlmisiniz!** Bu proqram vasitəsilə müxtəlif formatlarda imtahan suallarını sınaqdan keçirə və özünüzü yoxlaya bilərsiniz. Aşağıda əsas funksiyalar və onların necə işlədiyini görəcəksiniz:
+**Xoş gəlmisiniz!** Bu proqram vasitəsilə müxtəlif formatlarda imtahan suallarını sınaqdan keçirə və özünüzü yoxlaya bilərsiniz. Aşağıda əsas funksiyalar, dəstəklənən fayl formatı və necə istifadə ediləcəyi barədə ətraflı məlumat verilmişdir:
 
 ---
 
-### 📝 Özünü İmtahan Et
-- Word (.docx) faylını yükləyin (test sualları formatında).
-- 3 rejim mövcuddur:
-  - **50 təsadüfi sual** — 60 dəqiqəlik zamanla.
-  - **Bütün suallar** — limitsiz zamanla.
-  - **Aralıqdan seçilmiş suallar** — müəyyən hissəni seçərək sınaq keçə bilərsiniz.
+### 📄 Dəstəklənən fayl formatı:
+Yalnız `.docx` formatında Word sənədləri istifadə olunmalıdır.
 
-### 🎲 Sualları Qarışdır
-- Word faylından suallar alınır və variantları qarışdırılır.
-- Qarışdırılmış yeni sənəd və cavab açarı (.txt) yükləmək mümkündür.
+### 📝 Test suallarının formatı:
+- Hər bir sual nömrələnmiş olmalıdır:  
+  `1) Bu bir nümunə sualdır?`
+- Variantlar A-dan E-yə qədər olmalıdır:
+  A) Doğru cavab  
+  B) Yanlış cavab  
+  C) Yanlış cavab  
+  D) Yanlış cavab  
+  E) Yanlış cavab
 
-### 🎫 Bilet İmtahanı
-- Açıq sualları olan fayl (.docx) yükləyin.
-- Sistem təsadüfi 5 sualı seçir və sizə təqdim edir.
+- **Diqqət**: Doğru cavab həmişə **birinci** yazılmalıdır (`A)` altında).
 
----
+### 🧪 Rejimlər haqqında:
+- **📝 Özünü İmtahan Et**:
+  - 3 rejim mövcuddur: **50 təsadüfi sual**, **Bütün suallar**, **Aralıqdan seçilmiş suallar**.
+  - İmtahan zamanı cavabları qeyd edin, sonunda nəticə və düzgün cavablar göstəriləcək.
+  - Əgər suallar ekrana gəlmirsə və ya başlanmırsa, sualların düzgün formatda olduğundan əmin olun.
+
+- **🎲 Sualları Qarışdır**:
+  - Word sənədindən suallar alınır və variantları qarışdırılır.
+  - Yeni sənəd və cavab açarı yaradılır.
+  - `.docx` və `.txt` formatında yükləmək mümkündür.
+
+- **🎫 Bilet İmtahanı**:
+  - Açıq tipli sualları olan sənəddən 5 təsadüfi sual seçilir və bilet formasında təqdim olunur.
+
+### ⏱️ Vaxt məhdudiyyəti:
+- Yalnız **50 sual** rejimində aktivdir (60 dəqiqəlik taymer ilə).
+- **Bütün suallar** və **Aralıq seçimi** rejimində vaxt məhdudiyyəti yoxdur.
+
+### 📤 Nəticələr:
+- İmtahan bitdikdən sonra nəticə, düzgün və səhv cavablar göstərilir.
+- Proqres göstəricisi və faizlik nəticə təqdim olunur.
+- "Yenidən başla" düyməsi ilə təkrar sınaq keçmək mümkündür.
 
 ### ⚠️ Əgər:
-- **Fayl yüklədikdən sonra sual tapılmırsa**, onun strukturuna baxın: suallar 1) ..., variantlar A)... B)... şəklində olmalıdır.
-- **Aralıq seçimi rejimi ekranda qalırsa və başlamırsa**, düyməni kliklədikdən sonra sualların mövcudluğundan əmin olun.
-- **Vaxt məhdudiyyətli rejimdə vaxt bitdikdə avtomatik nəticələr göstərilir.**
+- **Fayl yüklədikdən sonra sual tapılmırsa**, strukturun uyğunluğunu yoxlayın.
+- **Sual və variantlar qarışmırsa**, formatın düzgün olduğundan əmin olun: `A)` ilə başlayan sətirlər olmalıdır.
+- **Zaman bitərsə**, sistem avtomatik imtahanı dayandıracaq və nəticəni göstərəcək.
+
+### 💡 Faydalı Məlumat:
+- Sual faylınızı nümunəyə uyğunlaşdırmaqda çətinlik çəkirsinizsə, yardım üçün bizimlə əlaqə saxlayın.
+- Saytda hər bölmədə əlavə köməkçi yazılar və göstərişlər yer alır.
+- Əgər texniki problem yaşanarsa, brauzeri yeniləyin və ya fayl strukturunu dəyişmədən yenidən yükləyin.
 
 ---
 
-### 💡 Faydalı Məlumat:
-- Sual faylınızın formatı uyğun deyilsə, istədiyiniz nümunəyə uyğunlaşdırmaq üçün bizdən yardım ala bilərsiniz.
-- Hər hansı texniki problem və ya sual üçün adminlə əlaqə saxlayın.
+Uğurlar və uğurlu nəticələr!
 """)
