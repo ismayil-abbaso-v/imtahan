@@ -147,44 +147,37 @@ if st.session_state.page == "exam":
 
             selected = []
 
-            if "50" in mode:
+            if mode == "🔹 50 təsadüfi sual":
                 selected = random.sample(questions, min(50, len(questions)))
                 st.session_state.use_timer = True
 
-            elif "Bütün" in mode:
+            elif mode == "🔸 Bütün suallar":
                 selected = questions
                 st.session_state.use_timer = False
 
-            elif "Aralıqdan" in mode:
+            elif mode == "🔻 Aralıqdan sual seçimi":
                 st.markdown(f"💡 Faylda toplam **{len(questions)}** sual tapıldı.")
-                start_q = st.number_input("🔢 Başlanğıc sual nömrəsi", min_value=1, max_value=len(questions), value=1)
-                end_q = st.number_input("🔢 Sonuncu sual nömrəsi", min_value=start_q, max_value=len(questions), value=min(len(questions), start_q + 49))
-                
+                start_q = st.number_input("🔢 Başlanğıc sual nömrəsi", min_value=1, max_value=len(questions), value=1, key="start_q")
+                end_q = st.number_input("🔢 Sonuncu sual nömrəsi", min_value=start_q, max_value=len(questions), value=min(len(questions), start_q + 49), key="end_q")
                 order_mode = st.radio("📑 Sualların sıralanması:", ["🔢 Ardıcıl", "🎲 Təsadüfi"], horizontal=True)
 
                 if st.button("🚀 İmtahana Başla"):
                     full_range = questions[start_q - 1:end_q]
-                
-                    if order_mode == "🎲 Təsadüfi":
-                        selected = random.sample(full_range, len(full_range))
-                    else:
-                        selected = full_range
+                    selected = random.sample(full_range, len(full_range)) if order_mode == "🎲 Təsadüfi" else full_range
+                    st.session_state.use_timer = False
 
+                    shuffled_questions = []
+                    for q_text, opts in selected:
+                        correct = opts[0]
+                        shuffled = opts[:]
+                        random.shuffle(shuffled)
+                        shuffled_questions.append((q_text, shuffled, correct))
 
-            st.session_state.use_timer = False
-
-            shuffled_questions = []
-            for q_text, opts in selected:
-                correct = opts[0]
-                shuffled = opts[:]
-                random.shuffle(shuffled)
-                shuffled_questions.append((q_text, shuffled, correct))
-
-            st.session_state.exam_questions = shuffled_questions
-            st.session_state.exam_answers = [None] * len(shuffled_questions)
-            st.session_state.exam_start_time = datetime.now()
-            st.session_state.exam_started = True
-            st.rerun()
+                    st.session_state.exam_questions = shuffled_questions
+                    st.session_state.exam_answers = [None] * len(shuffled_questions)
+                    st.session_state.exam_start_time = datetime.now()
+                    st.session_state.exam_started = True
+                    st.rerun()
 
             if mode != "🔻 Aralıqdan sual seçimi" and not st.session_state.exam_started:
                 if st.button("🚀 İmtahana Başla"):
