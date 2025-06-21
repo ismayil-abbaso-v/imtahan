@@ -94,22 +94,9 @@ if "page" not in st.session_state:
 
 if st.session_state.page == "home":
     st.title("📝 Testləri Qarışdır və Biliklərini Yoxla!")
-    st.markdown("Zəhmət olmasa bir rejim seçin:")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("📝 Özünü imtahan et"):
-            st.session_state.page = "exam"
-            st.rerun()
-    with col2:
-        if st.button("🎲 Sualları Qarışdır"):
-            st.session_state.page = "shuffle"
-            st.rerun()
-    with col3:
-        if st.button("🎫 Bilet İmtahanı"):
-            st.session_state.page = "ticket"
-            st.rerun()
-    with st.expander("ℹ️ İstifadə Qaydaları və Məlumat"):
-    st.markdown("""
+    
+    with st.expander("ℹ️ İstifadə Qaydaları və Məlumat", expanded=False):
+        st.markdown("""
 ### 📄 Dəstəklənən fayl formatı:
 Yalnız `.docx` formatında Word sənədləri istifadə olunmalıdır.
 
@@ -126,30 +113,46 @@ E) Yanlış cavab
 - **Diqqət**: Doğru cavab həmişə **birinci** yazılmalıdır (`A)` altında).
 
 ### 🧪 Rejimlər haqqında:
-- **Özünü imtahan et**: 50 sual və ya bütün suallardan test olun.
+- **Özünü imtahan et**: 50 sual, bütün suallar və ya sual aralığından test olun.
 - **Sualları Qarışdır**: Sənəddəki sualların sırası və variantları qarışdırılır, cavab açarı ilə birlikdə yüklənə bilir.
 - **Bilet İmtahanı**: Açıq tipli suallar üçün 5 sualdan ibarət təsadüfi bilet tərtib olunur.
 
 ### ⏱️ Vaxt məhdudiyyəti:
-- Yalnız 50 sual rejimində aktivdir (60 dəqiqə).
+- Yalnız **50 sual** rejimində aktivdir (60 dəqiqə).
 - Aralıqdan və ya bütün suallar rejimində məhdudiyyət yoxdur.
 
 ### 📤 Nəticələr:
 - İmtahan bitdikdən sonra nəticə, düzgün və səhv cavablar göstərilir.
 - "Yenidən başla" düyməsi ilə təkrar sınaq keçmək mümkündür.
-""")
+      """)
+
+  st.markdown("Zəhmət olmasa bir rejim seçin:")
+  col1, col2, col3 = st.columns(3)
+  with col1:
+      if st.button("📝 Özünü imtahan et"):
+          st.session_state.page = "exam"
+          st.rerun()
+  with col2:
+      if st.button("🎲 Sualları Qarışdır"):
+          st.session_state.page = "shuffle"
+          st.rerun()
+  with col3:
+      if st.button("🎫 Bilet İmtahanı"):
+          st.session_state.page = "ticket"
+          st.rerun()
 
 else:
-    st.sidebar.title("⚙️ Menyu")
-    if st.sidebar.button("🏠 Ana Səhifə"):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.session_state.page = "home"
-        st.rerun()
+  st.sidebar.title("⚙️ Menyu")
+  if st.sidebar.button("🏠 Ana Səhifə"):
+      for key in list(st.session_state.keys()):
+          del st.session_state[key]
+      st.session_state.page = "home"
+      st.rerun()
 
-    menu = st.sidebar.radio("🔁 Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı"],
-                            index=["exam", "shuffle", "ticket"].index(st.session_state.page))
-    st.session_state.page = {"📝 Özünü İmtahan Et": "exam", "🎲 Sualları Qarışdır": "shuffle", "🎫 Bilet İmtahanı": "ticket"}[menu]
+  menu = st.sidebar.radio("🔁 Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı"],
+                          index=["exam", "shuffle", "ticket"].index(st.session_state.page))
+  st.session_state.page = {"📝 Özünü İmtahan Et": "exam", "🎲 Sualları Qarışdır": "shuffle", "🎫 Bilet İmtahanı": "ticket"}[menu]
+
 
 if st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi ")
