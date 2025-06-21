@@ -16,8 +16,13 @@ def parse_docx(file):
     paragraphs = list(doc.paragraphs)
     i = 0
 
-    option_pattern = re.compile(r"^\s*[A-Ea-e][\)\.\:\-\s]+(.*)")
-    question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
+    # Variant işarələrinin çox elastik tanınması üçün nümunə regex:
+    # Variant hərfi A-E və işarə ) . : - və ya bu işarələrdən biri ilə davam etməli,
+    # işarədən sonra ən azı 1 boşluq olmalıdır.
+    option_pattern = re.compile(r"^\s*[A-Ea-e][\)\.\:\-]\s+(.+)$")
+
+    # Sual nömrəsi: sətirin əvvəlində ədədi nömrə, sonra ) və ya . və sonra sual mətni
+    question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.+)$")
 
     def is_numbered_paragraph(para):
         return para._p.pPr is not None and para._p.pPr.numPr is not None
@@ -31,54 +36,55 @@ def parse_docx(file):
 
         q_match = question_pattern.match(text)
         if q_match or is_numbered_paragraph(para):
+            # Sual nömrəsi varsa, sual mətnini toplayırıq
             question_text = q_match.group(2).strip() if q_match else text.strip()
             i += 1
-            # Sual mətninin davamını götür: variant başlamayana qədər
+
+            # Sualın növbəti abzasları sual mətni kimi toplanır
             while i < len(paragraphs):
                 next_text = ''.join(run.text for run in paragraphs[i].runs).strip()
                 if not next_text:
                     i += 1
                     continue
-                if option_pattern.match(next_text):  # Variant başlayır
+                # Əgər variant başladısa, sual yığılmasını dayandır
+                if option_pattern.match(next_text):
                     break
-                elif question_pattern.match(next_text):  # Yeni sual başlayıbsa, dayandır
+                # Yeni sual başlayırsa, dayandır
+                if question_pattern.match(next_text):
                     break
-                else:
-                    question_text += " " + next_text
-                    i += 1
+                # Əks halda sual mətninə əlavə et
+                question_text += " " + next_text
+                i += 1
 
-            # İndi variantları yığırıq
             options = []
+            # Variantları yığ
             while i < len(paragraphs):
                 opt_text = ''.join(run.text for run in paragraphs[i].runs).strip()
                 if not opt_text:
                     i += 1
                     continue
+                # Yeni sual başlanğıcı varsa variant yığılmasını dayandır
                 if question_pattern.match(opt_text):
                     break
                 match = option_pattern.match(opt_text)
                 if match:
                     content = match.group(1).strip()
+                    # variant boş deyilsə əlavə et
                     if content:
                         options.append(content)
                     i += 1
                 else:
-                    if len(options) < 5 and opt_text:
-                        options.append(opt_text)
-                        i += 1
-                    else:
-                        break
+                    # Əgər variant formatında olmayan sətir tapılsa,
+                    # variantlar bitmiş sayılır
+                    break
 
-            # Minimum 2 variant varsa və heç biri boş deyilsə, sualı əlavə et
+            # Minimum 2 variant varsa və boş variant yoxdursa sualı əlavə et
             if len(options) >= 2 and all(opt.strip() for opt in options):
                 question_blocks.append((question_text.strip(), options))
         else:
             i += 1
 
     return question_blocks
-
-
-
 
 @st.cache_data
 
