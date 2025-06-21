@@ -351,6 +351,8 @@ Yalnız `.docx` formatında Word sənədləri istifadə olunmalıdır.
 
 ### 💡 Faydalı Məlumat:
 - Sual faylınızı nümunəyə uyğunlaşdırmaqda çətinlik çəkirsinizsə, yardım üçün bizimlə əlaqə saxlayın.
+Gmail:ismayilabbasov3032@gmail.com
+Mailru:ismayilabbasov3032@mail.ru
 - Saytda hər bölmədə əlavə köməkçi yazılar və göstərişlər yer alır.
 - Əgər texniki problem yaşanarsa, brauzeri yeniləyin və ya fayl strukturunu dəyişmədən yenidən yükləyin.
 
