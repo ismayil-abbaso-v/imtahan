@@ -162,13 +162,14 @@ if st.session_state.page == "exam":
                 
                 order_mode = st.radio("📑 Sualların sıralanması:", ["🔢 Ardıcıl", "🎲 Təsadüfi"], horizontal=True)
 
-            if st.button("🚀 İmtahana Başla"):
-                full_range = questions[start_q - 1:end_q]
+if st.button("🚀 İmtahana Başla"):
+    full_range = questions[start_q - 1:end_q]
 
-            if "Təsadüfi" in order_mode:
-                selected = random.sample(full_range, len(full_range))
-            else:
-                selected = full_range
+    if order_mode == "🎲 Təsadüfi":
+        selected = random.sample(full_range, len(full_range))
+    else:
+        selected = full_range
+
 
             st.session_state.use_timer = False
 
