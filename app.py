@@ -9,13 +9,15 @@ st.set_page_config(page_title="İmtahan Hazırlayıcı", page_icon="📝")
 
 @st.cache_data
 
+@st.cache_data
 def parse_docx(file):
     doc = Document(file)
     question_blocks = []
     paragraphs = list(doc.paragraphs)
     i = 0
 
-    option_pattern = re.compile(r"^\s*[A-Ea-e][\)\.\:\-\s]+(.*)")
+    # İndi mütləq işarə tələb olunur (boşluq deyil)
+    option_pattern = re.compile(r"^\s*[A-Ea-e][\)\.\:\-]\s+(.*)")
     question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
 
     def is_numbered_paragraph(para):
@@ -32,32 +34,46 @@ def parse_docx(file):
         if q_match or is_numbered_paragraph(para):
             question_text = q_match.group(2).strip() if q_match else text.strip()
             i += 1
-            options = []
-
+            # Sual mətninin davamını yığırıq, variant başlamayana qədər
             while i < len(paragraphs):
-                option_text = ''.join(run.text for run in paragraphs[i].runs).strip()
-                if not option_text:
+                next_text = ''.join(run.text for run in paragraphs[i].runs).strip()
+                if not next_text:
                     i += 1
                     continue
-                if question_pattern.match(option_text):
+                if option_pattern.match(next_text):
                     break
-                match = option_pattern.match(option_text)
+                elif question_pattern.match(next_text):
+                    break
+                else:
+                    question_text += " " + next_text
+                    i += 1
+
+            options = []
+            while i < len(paragraphs):
+                opt_text = ''.join(run.text for run in paragraphs[i].runs).strip()
+                if not opt_text:
+                    i += 1
+                    continue
+                if question_pattern.match(opt_text):
+                    break
+                match = option_pattern.match(opt_text)
                 if match:
-                    options.append(match.group(1).strip())
+                    content = match.group(1).strip()
+                    if content:
+                        options.append(content)
                     i += 1
                 else:
-                    if len(options) < 5:
-                        options.append(option_text)
-                        i += 1
-                    else:
-                        break
+                    # variant kimi tanınmayan sətir varsa, burada dayana bilərik
+                    break
 
-            if len(options) >= 2:
-                question_blocks.append((question_text, options))
+            if len(options) >= 2 and all(opt.strip() for opt in options):
+                question_blocks.append((question_text.strip(), options))
         else:
             i += 1
 
     return question_blocks
+
+
 
 @st.cache_data
 
