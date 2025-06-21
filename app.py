@@ -312,6 +312,7 @@ Yalnız `.docx` formatında Word sənədləri istifadə olunmalıdır.
 - Hər bir sual nömrələnmiş olmalıdır:  
   `1) Bu bir nümunə sualdır?`
 - Variantlar A-dan E-yə qədər olmalıdır:
+
   A) Doğru cavab  
   B) Yanlış cavab  
   C) Yanlış cavab  
