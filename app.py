@@ -123,40 +123,73 @@ else:
 if st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi ")
     uploaded_file = st.file_uploader("📤 İmtahan üçün Word (.docx) faylını seçin", type="docx")
-    mode = st.radio("📌 Sual seçimi:", ["🔹 50 təsadüfi sual", "🔸 Bütün suallar"], index=0)
+    mode = st.radio(
+    "📌 Sual seçimi:", 
+    ["🔹 50 təsadüfi sual", "🔸 Bütün suallar", "🔻 Aralıqdan sual seçimi"],
+    index=0
+)
 
     if uploaded_file:
-        questions = parse_docx(uploaded_file)
-        if not questions:
-            st.error("❗ Heç bir sual tapılmadı.")
-        else:
-            if "exam_started" not in st.session_state:
-                st.session_state.exam_started = False
-            if "exam_submitted" not in st.session_state:
-                st.session_state.exam_submitted = False
-            if "exam_start_time" not in st.session_state:
-                st.session_state.exam_start_time = None
-            if "use_timer" not in st.session_state:
+    questions = parse_docx(uploaded_file)
+    if not questions:
+        st.error("❗ Heç bir sual tapılmadı.")
+    else:
+        if "exam_started" not in st.session_state:
+            st.session_state.exam_started = False
+        if "exam_submitted" not in st.session_state:
+            st.session_state.exam_submitted = False
+        if "exam_start_time" not in st.session_state:
+            st.session_state.exam_start_time = None
+        if "use_timer" not in st.session_state:
+            st.session_state.use_timer = False
+
+        selected = []
+
+        if "50" in mode:
+            selected = random.sample(questions, min(50, len(questions)))
+            st.session_state.use_timer = True
+
+        elif "Bütün" in mode:
+            selected = questions
+            st.session_state.use_timer = False
+
+        elif "Aralıqdan" in mode:
+            st.markdown(f"💡 Faylda toplam **{len(questions)}** sual tapıldı.")
+            start_q = st.number_input("🔢 Başlanğıc sual nömrəsi", min_value=1, max_value=len(questions), value=1)
+            end_q = st.number_input("🔢 Sonuncu sual nömrəsi", min_value=start_q, max_value=len(questions), value=min(len(questions), start_q + 49))
+
+            if st.button("🚀 İmtahana Başla"):
+                selected = questions[start_q - 1:end_q]
                 st.session_state.use_timer = False
 
-            if not st.session_state.exam_started:
-                if st.button("🚀 İmtahana Başla"):
-                    selected = random.sample(questions, min(50, len(questions))) if "50" in mode else questions
-                    use_timer = "50" in mode
-                    st.session_state.use_timer = use_timer
+                shuffled_questions = []
+                for q_text, opts in selected:
+                    correct = opts[0]
+                    shuffled = opts[:]
+                    random.shuffle(shuffled)
+                    shuffled_questions.append((q_text, shuffled, correct))
 
-                    shuffled_questions = []
-                    for q_text, opts in selected:
-                        correct = opts[0]
-                        shuffled = opts[:]
-                        random.shuffle(shuffled)
-                        shuffled_questions.append((q_text, shuffled, correct))
+                st.session_state.exam_questions = shuffled_questions
+                st.session_state.exam_answers = [None] * len(shuffled_questions)
+                st.session_state.exam_start_time = datetime.now()
+                st.session_state.exam_started = True
+                st.rerun()
+        
+        if mode != "🔻 Aralıqdan sual seçimi" and not st.session_state.exam_started:
+            if st.button("🚀 İmtahana Başla"):
+                shuffled_questions = []
+                for q_text, opts in selected:
+                    correct = opts[0]
+                    shuffled = opts[:]
+                    random.shuffle(shuffled)
+                    shuffled_questions.append((q_text, shuffled, correct))
 
-                    st.session_state.exam_questions = shuffled_questions
-                    st.session_state.exam_answers = [None] * len(shuffled_questions)
-                    st.session_state.exam_start_time = datetime.now()
-                    st.session_state.exam_started = True
-                    st.rerun()
+                st.session_state.exam_questions = shuffled_questions
+                st.session_state.exam_answers = [None] * len(shuffled_questions)
+                st.session_state.exam_start_time = datetime.now()
+                st.session_state.exam_started = True
+                st.rerun()
+
 
             elif st.session_state.exam_started and not st.session_state.exam_submitted:
                 if st.session_state.get("use_timer", False):
