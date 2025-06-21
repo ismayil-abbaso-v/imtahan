@@ -108,7 +108,7 @@ if st.session_state.page == "home":
         if st.button("🎫 Bilet İmtahanı"):
             st.session_state.page = "ticket"
             st.rerun()
-    with :
+    with col4:
         if st.sidebar.button("ℹ️ İstifadə Qaydaları"):
             st.session_state.page = "help"
             st.rerun()
