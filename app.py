@@ -120,16 +120,9 @@ else:
         st.session_state.page = "home"
         st.rerun()
 
-    menu = st.sidebar.radio("🔁 Rejimi dəyiş:", 
-    ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı", "ℹ️ İstifadə Qaydaları"],
-    index=["exam", "shuffle", "ticket", "help"].index(st.session_state.page)
-)
-st.session_state.page = {
-    "📝 Özünü İmtahan Et": "exam",
-    "🎲 Sualları Qarışdır": "shuffle",
-    "🎫 Bilet İmtahanı": "ticket",
-    "ℹ️ İstifadə Qaydaları": "help"
-}[menu]
+    menu = st.sidebar.radio("🔁 Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı", "ℹ️ İstifadə Qaydaları"],
+                            index=["exam", "shuffle", "ticket", "help"].index(st.session_state.page))
+    st.session_state.page = {"📝 Özünü İmtahan Et": "exam", "🎲 Sualları Qarışdır": "shuffle", "🎫 Bilet İmtahanı": "ticket", "ℹ️ İstifadə Qaydaları": "help"}[menu]
 
 if st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi ")
