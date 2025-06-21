@@ -108,6 +108,37 @@ if st.session_state.page == "home":
         if st.button("🎫 Bilet İmtahanı"):
             st.session_state.page = "ticket"
             st.rerun()
+    with st.expander("ℹ️ İstifadə Qaydaları və Məlumat"):
+    st.markdown("""
+### 📄 Dəstəklənən fayl formatı:
+Yalnız `.docx` formatında Word sənədləri istifadə olunmalıdır.
+
+### 📝 Test suallarının formatı:
+- Hər bir sual nömrələnmiş olmalıdır:  
+  `1) Bu bir nümunə sualdır?`
+- Variantlar A-dan E-yə qədər olmalıdır:
+A) Doğru cavab
+B) Yanlış cavab
+C) Yanlış cavab
+D) Yanlış cavab
+E) Yanlış cavab
+
+- **Diqqət**: Doğru cavab həmişə **birinci** yazılmalıdır (`A)` altında).
+
+### 🧪 Rejimlər haqqında:
+- **Özünü imtahan et**: 50 sual və ya bütün suallardan test olun.
+- **Sualları Qarışdır**: Sənəddəki sualların sırası və variantları qarışdırılır, cavab açarı ilə birlikdə yüklənə bilir.
+- **Bilet İmtahanı**: Açıq tipli suallar üçün 5 sualdan ibarət təsadüfi bilet tərtib olunur.
+
+### ⏱️ Vaxt məhdudiyyəti:
+- Yalnız 50 sual rejimində aktivdir (60 dəqiqə).
+- Aralıqdan və ya bütün suallar rejimində məhdudiyyət yoxdur.
+
+### 📤 Nəticələr:
+- İmtahan bitdikdən sonra nəticə, düzgün və səhv cavablar göstərilir.
+- "Yenidən başla" düyməsi ilə təkrar sınaq keçmək mümkündür.
+""")
+
 else:
     st.sidebar.title("⚙️ Menyu")
     if st.sidebar.button("🏠 Ana Səhifə"):
