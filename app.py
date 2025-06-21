@@ -16,8 +16,7 @@ def parse_docx(file):
     paragraphs = list(doc.paragraphs)
     i = 0
 
-    # İndi mütləq işarə tələb olunur (boşluq deyil)
-    option_pattern = re.compile(r"^\s*[A-Ea-e][\)\.\:\-]\s+(.*)")
+    option_pattern = re.compile(r"^\s*[A-Ea-e][\)\.\:\-\s]+(.*)")
     question_pattern = re.compile(r"^\s*(\d+)\s*[.)]\s*(.*)")
 
     def is_numbered_paragraph(para):
@@ -34,20 +33,21 @@ def parse_docx(file):
         if q_match or is_numbered_paragraph(para):
             question_text = q_match.group(2).strip() if q_match else text.strip()
             i += 1
-            # Sual mətninin davamını yığırıq, variant başlamayana qədər
+            # Sual mətninin davamını götür: variant başlamayana qədər
             while i < len(paragraphs):
                 next_text = ''.join(run.text for run in paragraphs[i].runs).strip()
                 if not next_text:
                     i += 1
                     continue
-                if option_pattern.match(next_text):
+                if option_pattern.match(next_text):  # Variant başlayır
                     break
-                elif question_pattern.match(next_text):
+                elif question_pattern.match(next_text):  # Yeni sual başlayıbsa, dayandır
                     break
                 else:
                     question_text += " " + next_text
                     i += 1
 
+            # İndi variantları yığırıq
             options = []
             while i < len(paragraphs):
                 opt_text = ''.join(run.text for run in paragraphs[i].runs).strip()
@@ -63,15 +63,20 @@ def parse_docx(file):
                         options.append(content)
                     i += 1
                 else:
-                    # variant kimi tanınmayan sətir varsa, burada dayana bilərik
-                    break
+                    if len(options) < 5 and opt_text:
+                        options.append(opt_text)
+                        i += 1
+                    else:
+                        break
 
+            # Minimum 2 variant varsa və heç biri boş deyilsə, sualı əlavə et
             if len(options) >= 2 and all(opt.strip() for opt in options):
                 question_blocks.append((question_text.strip(), options))
         else:
             i += 1
 
     return question_blocks
+
 
 
 
