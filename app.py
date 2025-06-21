@@ -303,7 +303,7 @@ elif st.session_state.page == "ticket":
 
                 st.markdown("---")
                 if st.button("🔁 Yenidən Bilet Çək"):
-                    st.session_state.ticket_questions = random.sample(questions,
+                    st.session_state.ticket_questions = random.sample(questions,5)
                                                                       
 elif st.session_state.page == "help":
     st.title("ℹ️ İstifadə Qaydaları və Yardım")
@@ -340,4 +340,3 @@ elif st.session_state.page == "help":
 - Sual faylınızın formatı uyğun deyilsə, istədiyiniz nümunəyə uyğunlaşdırmaq üçün bizdən yardım ala bilərsiniz.
 - Hər hansı texniki problem və ya sual üçün adminlə əlaqə saxlayın.
 """)
- 5)
