@@ -159,9 +159,15 @@ if st.session_state.page == "exam":
                 st.markdown(f"💡 Faylda toplam **{len(questions)}** sual tapıldı.")
                 start_q = st.number_input("🔢 Başlanğıc sual nömrəsi", min_value=1, max_value=len(questions), value=1)
                 end_q = st.number_input("🔢 Sonuncu sual nömrəsi", min_value=start_q, max_value=len(questions), value=min(len(questions), start_q + 49))
+                order_mode = st.radio("📑 Sualların sıralanması:", ["🔢 Ardıcıl", "🎲 Təsadüfi"], horizontal=True)
 
                 if st.button("🚀 İmtahana Başla"):
-                    selected = questions[start_q - 1:end_q]
+                    full_range = questions[start_q - 1:end_q]
+                    if "Təsadüfi" in order_mode:
+                        selected = random.sample(full_range, len(full_range))
+                    else:
+                        selected = full_range
+
                     st.session_state.use_timer = False
 
                     shuffled_questions = []
