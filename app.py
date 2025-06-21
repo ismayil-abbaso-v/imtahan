@@ -94,7 +94,7 @@ if "page" not in st.session_state:
 
 if st.session_state.page == "home":
     st.title("📝 Testləri Qarışdır və Biliklərini Yoxla!")
-    
+
     with st.expander("ℹ️ İstifadə Qaydaları və Məlumat", expanded=False):
         st.markdown("""
 ### 📄 Dəstəklənən fayl formatı:
@@ -110,6 +110,9 @@ C) Yanlış cavab
 D) Yanlış cavab
 E) Yanlış cavab
 
+markdown
+Kopyala
+Düzenle
 - **Diqqət**: Doğru cavab həmişə **birinci** yazılmalıdır (`A)` altında).
 
 ### 🧪 Rejimlər haqqında:
