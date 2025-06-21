@@ -110,9 +110,6 @@ C) Yanlış cavab
 D) Yanlış cavab
 E) Yanlış cavab
 
-markdown
-Kopyala
-Düzenle
 - **Diqqət**: Doğru cavab həmişə **birinci** yazılmalıdır (`A)` altında).
 
 ### 🧪 Rejimlər haqqında:
