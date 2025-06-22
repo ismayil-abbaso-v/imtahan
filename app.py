@@ -163,13 +163,27 @@ if st.session_state.page == "exam":
                 end_q = st.number_input("🔢 Sonuncu sual nömrəsi", min_value=start_q, max_value=len(questions), value=min(len(questions), start_q + 49), key="end_q")
                 order_mode = st.radio("📑 Sualların sıralanması:", ["🔢 Ardıcıl", "🎲 Təsadüfi"], horizontal=True)
 
+                interval_questions = questions[start_q - 1:end_q]
+
+                if len(interval_questions) >= 50:
+                    aralik_mode = st.radio("📌 Aralıqdan seçim rejimi:", ["🔻 Hamısı", "🔹 Aralıqdan 50 təsadüfi sual"], index=0)
+                else:
+                    aralik_mode = "🔻 Hamısı"
+
                 if st.button("🚀 İmtahana Başla"):
-                    full_range = questions[start_q - 1:end_q]
-                    selected = random.sample(full_range, len(full_range)) if order_mode == "🎲 Təsadüfi" else full_range
-                    st.session_state.use_timer = False
+                    if order_mode == "🎲 Təsadüfi":
+                        full_range = random.sample(interval_questions, len(interval_questions))
+                    else:
+                        full_range = interval_questions
+
+                    if aralik_mode == "🔹 Aralıqdan 50 təsadüfi sual":
+                        full_range = random.sample(full_range, 50)
+                        st.session_state.use_timer = True
+                    else:
+                        st.session_state.use_timer = False
 
                     shuffled_questions = []
-                    for q_text, opts in selected:
+                    for q_text, opts in full_range:
                         correct = opts[0]
                         shuffled = opts[:]
                         random.shuffle(shuffled)
@@ -243,6 +257,7 @@ if st.session_state.page == "exam":
                     for key in keys_to_clear:
                         st.session_state.pop(key)
                     st.rerun()
+
 
 
 elif st.session_state.page == "shuffle":
