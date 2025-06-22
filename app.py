@@ -158,42 +158,39 @@ if st.session_state.page == "exam":
                 st.session_state.use_timer = False
 
             elif mode == "🔻 Aralıqdan sual seçimi":
-                st.markdown(f"💡 Faylda toplam **{len(questions)}** sual tapıldı.")
-                start_q = st.number_input("🔢 Başlanğıc sual nömrəsi", min_value=1, max_value=len(questions), value=1, key="start_q")
-                end_q = st.number_input("🔢 Sonuncu sual nömrəsi", min_value=start_q, max_value=len(questions), value=min(len(questions), start_q + 49), key="end_q")
-                order_mode = st.radio("📑 Sualların sıralanması:", ["🔢 Ardıcıl", "🎲 Təsadüfi"], horizontal=True)
+    st.markdown(f"💡 Faylda toplam **{len(questions)}** sual tapıldı.")
+    start_q = st.number_input("🔢 Başlanğıc sual nömrəsi", min_value=1, max_value=len(questions), value=1, key="start_q")
+    end_q = st.number_input("🔢 Sonuncu sual nömrəsi", min_value=start_q, max_value=len(questions), value=min(len(questions), start_q + 49), key="end_q")
+    order_mode = st.radio("📑 Sualların sıralanması:", ["🔢 Ardıcıl", "🎲 Təsadüfi"], horizontal=True)
 
-                interval_questions = questions[start_q - 1:end_q]
+    interval_questions = questions[start_q - 1:end_q]
+    aralik_mode = st.radio("📌 Aralıqdan seçim rejimi:", ["🔻 Hamısı", "🔹 Aralıqdan təsadüfi suallar"], index=0)
 
-                if len(interval_questions) >= 50:
-                    aralik_mode = st.radio("📌 Aralıqdan seçim rejimi:", ["🔻 Hamısı", "🔹 Aralıqdan 50 təsadüfi sual"], index=0)
-                else:
-                    aralik_mode = "🔻 Hamısı"
+    if st.button("🚀 İmtahana Başla"):
+        if order_mode == "🎲 Təsadüfi":
+            full_range = random.sample(interval_questions, len(interval_questions))
+        else:
+            full_range = interval_questions
 
-                if st.button("🚀 İmtahana Başla"):
-                    if order_mode == "🎲 Təsadüfi":
-                        full_range = random.sample(interval_questions, len(interval_questions))
-                    else:
-                        full_range = interval_questions
+        if aralik_mode == "🔹 Aralıqdan təsadüfi suallar":
+            full_range = random.sample(full_range, min(50, len(full_range)))  # 50 və ya daha az
+            st.session_state.use_timer = True
+        else:
+            st.session_state.use_timer = False
 
-                    if aralik_mode == "🔹 Aralıqdan 50 təsadüfi sual":
-                        full_range = random.sample(full_range, 50)
-                        st.session_state.use_timer = True
-                    else:
-                        st.session_state.use_timer = False
+        shuffled_questions = []
+        for q_text, opts in full_range:
+            correct = opts[0]
+            shuffled = opts[:]
+            random.shuffle(shuffled)
+            shuffled_questions.append((q_text, shuffled, correct))
 
-                    shuffled_questions = []
-                    for q_text, opts in full_range:
-                        correct = opts[0]
-                        shuffled = opts[:]
-                        random.shuffle(shuffled)
-                        shuffled_questions.append((q_text, shuffled, correct))
+        st.session_state.exam_questions = shuffled_questions
+        st.session_state.exam_answers = [None] * len(shuffled_questions)
+        st.session_state.exam_start_time = datetime.now()
+        st.session_state.exam_started = True
+        st.rerun()
 
-                    st.session_state.exam_questions = shuffled_questions
-                    st.session_state.exam_answers = [None] * len(shuffled_questions)
-                    st.session_state.exam_start_time = datetime.now()
-                    st.session_state.exam_started = True
-                    st.rerun()
 
             if mode != "🔻 Aralıqdan sual seçimi" and not st.session_state.exam_started:
                 if st.button("🚀 İmtahana Başla"):
