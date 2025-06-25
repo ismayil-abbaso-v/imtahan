@@ -326,7 +326,7 @@ elif st.session_state.page == "score_calc":
     st.markdown("### Fənnin növünü seçin:")
     subject_type = st.radio("Bu fənn hansı əsasladır?", ["📘 Məşğələ", "🧪 Laboratoriya"])
 
-    # Ümumi inputlar
+    # Ümumi inputlar (hər iki fənn üçün ortaq)
     a = st.number_input("1-ci kollekvium balı (maks 10)", min_value=0, max_value=10, step=1)
     b = st.number_input("2-ci kollekvium balı (maks 10)", min_value=0, max_value=10, step=1)
     c = st.number_input("3-cü kollekvium balı (maks 10)", min_value=0, max_value=10, step=1)
@@ -335,18 +335,20 @@ elif st.session_state.page == "score_calc":
         d = st.number_input("1-ci sərbəst iş balı (maks 5)", min_value=0, max_value=5, step=1)
         e = st.number_input("2-ci sərbəst iş balı (maks 5)", min_value=0, max_value=5, step=1)
         mesqele_orta = st.number_input("Məşğələ orta balı (maks 10)", min_value=0.0, max_value=10.0, step=0.1)
+
         l = st.number_input("Fənn üzrə dərs saatı (tam ədəd)", min_value=1, step=1)
         m = st.number_input("Neçə dəfə dərsdən qalmısınız (qayıb sayı)", min_value=0, max_value=l, step=1)
 
         if st.button("🔢 Balı Hesabla"):
-            h = ((a + b + c) / 3) * 1.8
-            i = d + e
-            p = mesqele_orta
+            h = ((a + b + c) / 3) * 1.8      # kollekvium
+            i = d + e                        # sərbəst iş
+            p = mesqele_orta                # məşğələ balı
             n = m * 2
             o = (n / l) * 10
-            q = 10 - o
+            q = 10 - o                      # davamiyyət
             k = h + i + p + q
-            q_limit = l // 4 // 2
+
+            q_limit = l * 0.25 / 2          # qayib limiti
 
             st.markdown("---")
             if m > q_limit:
@@ -355,11 +357,13 @@ elif st.session_state.page == "score_calc":
                 st.success(f"✅ İmtahan öncəsi topladığınız ümumi bal: **{k:.2f}**")
 
     elif subject_type == "🧪 Laboratoriya":
-        d = st.number_input("1-ci sərbəst iş balı (maks 10)", min_value=0, max_value=10, step=1)
-        e = st.number_input("2-ci sərbəst iş balı (maks 10)", min_value=0, max_value=10, step=1)
-        f = st.number_input("Laboratoriya işlərinin ümumi sayı (tam ədəd)", min_value=1, step=1)
+        d = st.number_input("1-ci sərbəst iş balı (maks 5)", min_value=0, max_value=5, step=1)
+        e = st.number_input("2-ci sərbəst iş balı (maks 5)", min_value=0, max_value=5, step=1)
+
+        f = st.number_input("Laboratoriya işlərinin ümumi sayı", min_value=1, step=1)
         g = st.number_input("Təhvil verilən laboratoriya sayı", min_value=0, max_value=f, step=1)
-        l = st.number_input("Fənn üzrə dərs saatı (tam ədəd)", min_value=1, step=1)
+
+        l = st.number_input("Fənn üzrə dərs saatı", min_value=1, step=1)
         m = st.number_input("Neçə dəfə dərsdən qalmısınız (qayıb sayı)", min_value=0, max_value=l, step=1)
 
         if st.button("🔢 Balı Hesabla"):
@@ -370,14 +374,14 @@ elif st.session_state.page == "score_calc":
             o = (n / l) * 10
             p = 10 - o
             k = h + i + j + p
-            q_limit = l // 4 // 2
+
+            q_limit = l * 0.25 / 2
 
             st.markdown("---")
             if m > q_limit:
                 st.error("🚫 Sizin qayıb sayınız çox olduğundan imtahana buraxılmırsınız!")
             else:
                 st.success(f"✅ İmtahan öncəsi topladığınız ümumi bal: **{k:.2f}**")
-
 
                                                                       
 elif st.session_state.page == "help":
