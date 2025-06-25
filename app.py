@@ -403,72 +403,75 @@ Yalnız `.docx` formatında Word sənədləri istifadə olunmalıdır.
 - **Diqqət**: Doğru cavab həmişə **birinci** yazılmalıdır (`A)` altında).
 
 ### 🧪 Rejimlər haqqında:
-- **📝 Özünü İmtahan Et**:
-  - 3 rejim mövcuddur: **50 təsadüfi sual**, **Bütün suallar**, **Aralıqdan seçilmiş suallar**.
-  - İmtahan zamanı cavabları qeyd edin, sonunda nəticə və düzgün cavablar göstəriləcək.
-  - Əgər suallar ekrana gəlmirsə və ya başlanmırsa, sualların düzgün formatda olduğundan əmin olun.
 
-- **🎲 Sualları Qarışdır**:
-  - Word sənədindən suallar alınır və variantları qarışdırılır.
-  - Yeni sənəd və cavab açarı yaradılır.
-  - `.docx` və `.txt` formatında yükləmək mümkündür.
+#### 📝 Özünü İmtahan Et:
+- 3 rejim mövcuddur:  
+  - **50 təsadüfi sual** (60 dəqiqəlik taymer ilə)  
+  - **Bütün suallar** (vaxt məhdudiyyəti yoxdur)  
+  - **Aralıqdan seçilmiş suallar** (istədiyiniz aralıqdan seçim; ardıcıl, təsadüfi və ya 50 təsadüfi variantları mövcuddur)  
+- İmtahan zamanı cavablar qeyd olunur və sonunda nəticə, düzgün cavablar göstərilir.  
+- Vaxt bitdikdə imtahan avtomatik tamamlanır.
 
-- **🎫 Bilet İmtahanı**:
-  - Açıq tipli sualları olan sənəddən 5 təsadüfi sual seçilir və bilet formasında təqdim olunur.
+#### 🎲 Sualları Qarışdır:
+- Word sənədindən suallar və variantlar alınır, doğru cavablar qarışdırılır.  
+- Qarışdırılmış suallar `.docx` faylı, cavab açarı isə `.txt` faylı kimi yüklənə bilər.  
+- Suallar 50 təsadüfi və ya bütün suallar olaraq seçilə bilər.
+
+#### 🎫 Bilet İmtahanı (Açıq suallar):
+- Açıq tipli suallardan 5 təsadüfi sual seçilir.  
+- "Bilet Çək" düyməsi ilə yeni suallar seçmək mümkündür.
 
 ### ⏱️ Vaxt məhdudiyyəti:
-- Yalnız **50 sual** rejimində aktivdir (60 dəqiqəlik taymer ilə).
-- **Bütün suallar** və **Aralıq seçimi** rejimində vaxt məhdudiyyəti yoxdur.
+- **50 sual** rejimində 60 dəqiqəlik vaxt məhdudiyyəti var.  
+- Digər rejimlərdə vaxt məhdudiyyəti yoxdur.
 
 ### 📤 Nəticələr:
-- İmtahan bitdikdən sonra nəticə, düzgün və səhv cavablar göstərilir.
-- Proqres göstəricisi və faizlik nəticə təqdim olunur.
-- "Yenidən başla" düyməsi ilə təkrar sınaq keçmək mümkündür.
-
-### ⚠️ Əgər:
-- **Fayl yüklədikdən sonra sual tapılmırsa**, strukturun uyğunluğunu yoxlayın.
-- **Sual və variantlar qarışmırsa**, formatın düzgün olduğundan əmin olun: `A)` ilə başlayan sətirlər olmalıdır.
-- **Zaman bitərsə**, sistem avtomatik imtahanı dayandıracaq və nəticəni göstərəcək.
+- İmtahan tamamlandıqda düzgün və səhv cavablar, nəticə faizi göstərilir.  
+- "Yenidən Başla" düyməsi ilə imtahan təkrar edilə bilər.
 
 ### 🧮 Bal Hesablanması Haqqında:
 
 - **Məşğələ fənni üçün bal hesablanması:**
 
-  - Kollekviumların ortalaması 18 baldır (3 kollekviumdan orta hesablanır və 1.8 ilə vurulur).
-  - Sərbəst işlər maksimum 10 baldır (1-ci və 2-ci sərbəst işlər toplanır).
-  - Məşğələ balı 10 üzərindən daxil edilir və 1.2 ilə vurularaq 12 bala çevrilir.
-  - Davamiyyət balı maksimum 10 baldır. Qayıb sayı dərs saatının müəyyən faizini keçərsə, bal azaldılır.
-  - Ümumi bal kollekvium, sərbəst işlər, məşğələ və davamiyyət ballarının cəmi olur.
-  - Qayıb sayının icazə verilən həddən çox olması imtahana buraxılmamağa səbəb olur.
+  - Kollekviumların ortalaması 18 baldır (3 kollekviumun orta balı * 1.8).  
+  - 2 sərbəst iş balı toplanır (maksimum 10 bal).  
+  - Məşğələ balı 10 üzərindən daxil edilir və 1.2 ilə vurularaq 12 bal hesablanır.  
+  - Davamiyyət balı maksimum 10 baldır. Qayıb sayı dərs saatının müəyyən faizini keçərsə, bal azaldılır.  
+  - Ümumi bal: kollekvium + sərbəst işlər + məşğələ + davamiyyət.  
+  - Qayıb limiti: (Dərs saatı // 4) // 2, aşılması imtahana buraxılmamağa səbəb olur.
 
 - **Laboratoriya fənni üçün bal hesablanması:**
 
-  - Kollekviumların ortalaması 18 baldır.
-  - Sərbəst işlər maksimum 10 baldır.
-  - Laboratoriya işlərinin sayı və təhvil verilən işlərin nisbəti əsasında maksimum 12 bal hesablanır.
-  - Davamiyyət balı və qayıb limiti məşğələ fənnindəki kimi hesablanır.
-  - Ümumi bal kollekvium, sərbəst işlər, laboratoriya və davamiyyət ballarının cəmi olur.
-
-- **Qayıb limiti:**
-
-  - Fənnin dərs saatına görə müəyyən olunur: icazə verilən maksimum qayıb = (Dərs saatı // 4) // 2
-  - Bu limitdən çox qayıb varsa, imtahana buraxılmırsınız.
+  - Kollekviumların ortalaması 18 baldır.  
+  - 2 sərbəst iş balı toplanır (maksimum 10 bal).  
+  - Laboratoriya işlərinin sayı və təhvil verilən işlərin nisbətinə görə maksimum 12 bal hesablanır.  
+  - Davamiyyət balı və qayıb limiti məşğələ fənni ilə eynidir.  
+  - Ümumi bal: kollekvium + sərbəst işlər + laboratoriya + davamiyyət.
 
 - **Bal hesablamasında maksimum ballar:**
 
-  | Bal növü           | Maksimum bal |
-  |--------------------|--------------|
-  | Kollekvium         | 18           |
-  | Sərbəst işlər      | 10           |
+  | Bal növü            | Maksimum bal |
+  |---------------------|--------------|
+  | Kollekvium          | 18           |
+  | Sərbəst işlər       | 10           |
   | Məşğələ/Laboratoriya| 12           |
-  | Davamiyyət         | 10           |
-  | **Ümumi maksimum** | **50**       |
+  | Davamiyyət          | 10           |
+  | **Ümumi maksimum**  | **50**       |
 
-- **Nəzərə alınması vacib olanlar:**
+- **Vacib qeyd:**  
+  - Balın düzgün hesablanması üçün bütün girişlər maksimum hədlərdə olmalıdır.  
+  - Qayıb sayı icazə verilən limitdən çox olarsa, imtahana buraxılmırsınız.
 
-  - Hər bir bal sahəsinin maksimum qiymətləri dəyişdirilə bilər, bu proqramda standart qaydalara uyğun olaraq tətbiq olunur.
-  - Hesablamalarda balın düzgün çıxması üçün bütün girişlər maksimum hədlərdə daxil edilməlidir.
-  - İmtahan öncəsi bu bal sistemi ilə hazırlaşma və nəticələrin hesablanması mümkündür.
+### ⚠️ Əgər:
+- Fayl yüklədikdən sonra sual tapılmırsa, faylın strukturunu yoxlayın.  
+- Sual və variantlar qarışmırsa, variantların düzgün `A)` formatında yazıldığından əmin olun.  
+- Zaman bitərsə, imtahan avtomatik tamamlanacaq və nəticələr göstəriləcək.  
+- Problemlə qarşılaşdıqda brauzeri yeniləyin və ya faylı yenidən yükləyin.
+
+### 💡 Əlaqə və Yardım:
+- Əgər çətinlik yaşayırsınızsa, bizimlə əlaqə saxlayın:  
+  - Gmail: ismayilabbasov3032@gmail.com  
+  - Mailru: ismayilabbasov3032@mail.ru
 
 ---
 
