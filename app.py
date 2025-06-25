@@ -95,7 +95,7 @@ if "page" not in st.session_state:
 if st.session_state.page == "home":
     st.title("📝 Testləri Qarışdır və Biliklərini Yoxla!")
     st.markdown("Zəhmət olmasa bir rejim seçin:")
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
         if st.button("📝 Özünü imtahan et"):
             st.session_state.page = "exam"
@@ -112,6 +112,10 @@ if st.session_state.page == "home":
         if st.sidebar.button("ℹ️ İstifadə Qaydaları"):
             st.session_state.page = "help"
             st.rerun()
+    with col5:
+        if st.button("🧮 Bal Hesablaması"):
+            st.session_state.page = "score_calc"
+            st.rerun()
 else:
     st.sidebar.title("⚙️ Menyu")
     if st.sidebar.button("🏠 Ana Səhifə"):
@@ -120,9 +124,9 @@ else:
         st.session_state.page = "home"
         st.rerun()
 
-    menu = st.sidebar.radio("🔁 Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı", "ℹ️ İstifadə Qaydaları"],
+    menu = st.sidebar.radio("🔁 Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı", "🧮 Bal Hesablaması", "ℹ️ İstifadə Qaydaları"],
                             index=["exam", "shuffle", "ticket", "help"].index(st.session_state.page))
-    st.session_state.page = {"📝 Özünü İmtahan Et": "exam", "🎲 Sualları Qarışdır": "shuffle", "🎫 Bilet İmtahanı": "ticket", "ℹ️ İstifadə Qaydaları": "help"}[menu]
+    st.session_state.page = {"📝 Özünü İmtahan Et": "exam", "🎲 Sualları Qarışdır": "shuffle", "🎫 Bilet İmtahanı": "ticket", "🧮 Bal Hesablaması": "score_calc", "ℹ️ İstifadə Qaydaları": "help"}[menu]
 
 if st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi ")
@@ -314,6 +318,37 @@ elif st.session_state.page == "ticket":
                 st.markdown("---")
                 if st.button("🔁 Yenidən Bilet Çək"):
                     st.session_state.ticket_questions = random.sample(questions,5)
+                    
+elif st.session_state.page == "score_calc":
+    st.title("🧮 Bal Hesablaması Sistemi")
+
+    a = st.number_input("1-ci kollekvium balınızı daxil edin:", min_value=0.0, max_value=100.0, step=1.0)
+    b = st.number_input("2-ci kollekvium balınızı daxil edin:", min_value=0.0, max_value=100.0, step=1.0)
+    c = st.number_input("3-cü kollekvium balınızı daxil edin:", min_value=0.0, max_value=100.0, step=1.0)
+    d = st.number_input("1-ci sərbəst iş balınızı daxil edin:", min_value=0.0, max_value=10.0, step=1.0)
+    e = st.number_input("2-ci sərbəst iş balınızı daxil edin:", min_value=0.0, max_value=10.0, step=1.0)
+    f = st.number_input("Laboratoriya işlərinin ümumi sayı:", min_value=1.0, step=1.0)
+    g = st.number_input("Neçə laboratoriya işi təhvil vermisiniz:", min_value=0.0, max_value=f, step=1.0)
+    l = st.number_input("Fənn üzrə dərs saatı:", min_value=1.0, step=1.0)
+    m = st.number_input("Neçə dəfə dərsdən qalmısınız (qayıb):", min_value=0.0, max_value=l, step=1.0)
+
+    if st.button("🔢 Balı Hesabla"):
+        h = ((a + b + c) / 3) * 1.8
+        i = d + e
+        j = (g / f) * 12
+        n = m * 2
+        o = (n / l) * 10
+        p = 10 - o
+        k = h + i + j + p
+        q = l * (1 / 4)
+        r = q / 2
+
+        st.markdown("---")
+        if m > r:
+            st.error("🚫 Sizin qayıb sayınız çox olduğundan imtahana buraxılmırsınız!")
+        else:
+            st.success(f"✅ Sizin imtahan öncəsi topladığınız ümumi bal: **{k:.2f}**")
+
                                                                       
 elif st.session_state.page == "help":
     st.title("ℹ️ İstifadə Qaydaları və Yardım")
