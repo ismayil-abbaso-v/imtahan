@@ -109,13 +109,14 @@ if st.session_state.page == "home":
             st.session_state.page = "ticket"
             st.rerun()
     with col4:
-        if st.button("ℹ️ İstifadə Qaydaları"):
-            st.session_state.page = "help"
-            st.rerun()
-    with col5:
         if st.button("🧮 Bal Hesablaması"):
             st.session_state.page = "score_calc"
             st.rerun()
+    with col5:
+        if st.button("ℹ️ İstifadə Qaydaları"):
+            st.session_state.page = "help"
+            st.rerun()
+    
 else:
     st.sidebar.title("⚙️ Menyu")
     if st.sidebar.button("🏠 Ana Səhifə"):
