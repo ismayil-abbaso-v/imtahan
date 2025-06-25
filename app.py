@@ -334,14 +334,14 @@ elif st.session_state.page == "score_calc":
     if subject_type == "📘 Məşğələ":
         d = st.number_input("1-ci sərbəst iş balı (maks 5)", min_value=0, max_value=5, step=1)
         e = st.number_input("2-ci sərbəst iş balı (maks 5)", min_value=0, max_value=5, step=1)
-        mesqele_orta = st.number_input("Məşğələ orta balı (maks 12)", min_value=0.0, max_value=12.0, step=0.1)
+        mesqele_orta = st.number_input("Məşğələ orta balı (maks 10)", min_value=0.0, max_value=10.0, step=0.1)
         l = st.number_input("Fənn üzrə dərs saatı (tam ədəd)", min_value=1, step=1)
         m = st.number_input("Neçə dəfə dərsdən qalmısınız (qayıb sayı)", min_value=0, max_value=l, step=1)
 
         if st.button("🔢 Balı Hesabla"):
-            h = ((a + b + c) / 3) * 1.8        # Kollekviumlardan maksimum 18 bal
-            i = d + e                         # Sərbəst işlərdən maksimum 10 bal
-            p = mesqele_orta                  # Məşğələ balı maksimum 12 bal
+            h = ((a + b + c) / 3) * 1.8        # Kollekvium: 18 bal
+            i = d + e                         # Sərbəst işlər: 10 bal
+            p = mesqele_orta * 1.2            # Məşğələ: 10 üzərindən daxil olunur → 12 bala miqyaslanır
             n = m * 2                         # Qayıb x2
             o = (n / l) * 10                  # Davamiyyət itkisi (maks 10)
             q = 10 - o                        # Davamiyyət balı
@@ -363,9 +363,9 @@ elif st.session_state.page == "score_calc":
         m = st.number_input("Neçə dəfə dərsdən qalmısınız (qayıb sayı)", min_value=0, max_value=l, step=1)
 
         if st.button("🔢 Balı Hesabla"):
-            h = ((a + b + c) / 3) * 1.8        # Kollekviumlardan maksimum 18 bal
-            i = d + e                         # Sərbəst işlərdən maksimum 10 bal
-            j = (g / f) * 12                  # Laboratoriyadan maksimum 12 bal
+            h = ((a + b + c) / 3) * 1.8        # Kollekvium: 18 bal
+            i = d + e                         # Sərbəst işlər: 10 bal
+            j = (g / f) * 12                  # Laboratoriya işləri: 12 bal
             n = m * 2                         # Qayıb x2
             o = (n / l) * 10                  # Davamiyyət itkisi (maks 10)
             p = 10 - o                        # Davamiyyət balı
