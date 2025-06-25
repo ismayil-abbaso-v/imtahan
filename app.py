@@ -323,32 +323,61 @@ elif st.session_state.page == "ticket":
 elif st.session_state.page == "score_calc":
     st.title("🧮 Bal Hesablaması Sistemi")
 
-    a = st.number_input("1-ci kollekvium balınızı daxil edin:", min_value=0.0, max_value=100.0, step=1.0)
-    b = st.number_input("2-ci kollekvium balınızı daxil edin:", min_value=0.0, max_value=100.0, step=1.0)
-    c = st.number_input("3-cü kollekvium balınızı daxil edin:", min_value=0.0, max_value=100.0, step=1.0)
-    d = st.number_input("1-ci sərbəst iş balınızı daxil edin:", min_value=0.0, max_value=10.0, step=1.0)
-    e = st.number_input("2-ci sərbəst iş balınızı daxil edin:", min_value=0.0, max_value=10.0, step=1.0)
-    f = st.number_input("Laboratoriya işlərinin ümumi sayı:", min_value=1.0, step=1.0)
-    g = st.number_input("Neçə laboratoriya işi təhvil vermisiniz:", min_value=0.0, max_value=f, step=1.0)
-    l = st.number_input("Fənn üzrə dərs saatı:", min_value=1.0, step=1.0)
-    m = st.number_input("Neçə dəfə dərsdən qalmısınız (qayıb):", min_value=0.0, max_value=l, step=1.0)
+    st.markdown("### Fənnin növünü seçin:")
+    subject_type = st.radio("Bu fənn hansı əsasladır?", ["📘 Məşğələ", "🧪 Laboratoriya"])
 
-    if st.button("🔢 Balı Hesabla"):
-        h = ((a + b + c) / 3) * 1.8
-        i = d + e
-        j = (g / f) * 12
-        n = m * 2
-        o = (n / l) * 10
-        p = 10 - o
-        k = h + i + j + p
-        q = l * (1 / 4)
-        r = q / 2
+    # Ümumi inputlar
+    a = st.number_input("1-ci kollekvium balı (maks 10)", min_value=0, max_value=10, step=1)
+    b = st.number_input("2-ci kollekvium balı (maks 10)", min_value=0, max_value=10, step=1)
+    c = st.number_input("3-cü kollekvium balı (maks 10)", min_value=0, max_value=10, step=1)
 
-        st.markdown("---")
-        if m > r:
-            st.error("🚫 Sizin qayıb sayınız çox olduğundan imtahana buraxılmırsınız!")
-        else:
-            st.success(f"✅ Sizin imtahan öncəsi topladığınız ümumi bal: **{k:.2f}**")
+    if subject_type == "📘 Məşğələ":
+        d = st.number_input("1-ci sərbəst iş balı (maks 5)", min_value=0, max_value=5, step=1)
+        e = st.number_input("2-ci sərbəst iş balı (maks 5)", min_value=0, max_value=5, step=1)
+        mesqele_orta = st.number_input("Məşğələ orta balı (maks 10)", min_value=0.0, max_value=10.0, step=0.1)
+        l = st.number_input("Fənn üzrə dərs saatı (tam ədəd)", min_value=1, step=1)
+        m = st.number_input("Neçə dəfə dərsdən qalmısınız (qayıb sayı)", min_value=0, max_value=l, step=1)
+
+        if st.button("🔢 Balı Hesabla"):
+            h = ((a + b + c) / 3) * 1.8
+            i = d + e
+            p = mesqele_orta
+            n = m * 2
+            o = (n / l) * 10
+            q = 10 - o
+            k = h + i + p + q
+            q_limit = l // 4 // 2
+
+            st.markdown("---")
+            if m > q_limit:
+                st.error("🚫 Sizin qayıb sayınız çox olduğundan imtahana buraxılmırsınız!")
+            else:
+                st.success(f"✅ İmtahan öncəsi topladığınız ümumi bal: **{k:.2f}**")
+
+    elif subject_type == "🧪 Laboratoriya":
+        d = st.number_input("1-ci sərbəst iş balı (maks 10)", min_value=0, max_value=10, step=1)
+        e = st.number_input("2-ci sərbəst iş balı (maks 10)", min_value=0, max_value=10, step=1)
+        f = st.number_input("Laboratoriya işlərinin ümumi sayı (tam ədəd)", min_value=1, step=1)
+        g = st.number_input("Təhvil verilən laboratoriya sayı", min_value=0, max_value=f, step=1)
+        l = st.number_input("Fənn üzrə dərs saatı (tam ədəd)", min_value=1, step=1)
+        m = st.number_input("Neçə dəfə dərsdən qalmısınız (qayıb sayı)", min_value=0, max_value=l, step=1)
+
+        if st.button("🔢 Balı Hesabla"):
+            h = ((a + b + c) / 3) * 1.8
+            i = d + e
+            j = (g / f) * 12
+            n = m * 2
+            o = (n / l) * 10
+            p = 10 - o
+            k = h + i + j + p
+            q_limit = l // 4 // 2
+
+            st.markdown("---")
+            if m > q_limit:
+                st.error("🚫 Sizin qayıb sayınız çox olduğundan imtahana buraxılmırsınız!")
+            else:
+                st.success(f"✅ İmtahan öncəsi topladığınız ümumi bal: **{k:.2f}**")
+
 
                                                                       
 elif st.session_state.page == "help":
