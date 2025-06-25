@@ -430,12 +430,45 @@ Yalnız `.docx` formatında Word sənədləri istifadə olunmalıdır.
 - **Sual və variantlar qarışmırsa**, formatın düzgün olduğundan əmin olun: `A)` ilə başlayan sətirlər olmalıdır.
 - **Zaman bitərsə**, sistem avtomatik imtahanı dayandıracaq və nəticəni göstərəcək.
 
-### 💡 Faydalı Məlumat:
-- Sual faylınızı nümunəyə uyğunlaşdırmaqda çətinlik çəkirsinizsə, yardım üçün bizimlə əlaqə saxlayın.
-- Gmail: ismayilabbasov3032@gmail.com
-- Mailru: ismayilabbasov3032@mail.ru
-- Saytda hər bölmədə əlavə köməkçi yazılar və göstərişlər yer alır.
-- Əgər texniki problem yaşanarsa, brauzeri yeniləyin və ya fayl strukturunu dəyişmədən yenidən yükləyin.
+### 🧮 Bal Hesablanması Haqqında:
+
+- **Məşğələ fənni üçün bal hesablanması:**
+
+  - Kollekviumların ortalaması 18 baldır (3 kollekviumdan orta hesablanır və 1.8 ilə vurulur).
+  - Sərbəst işlər maksimum 10 baldır (1-ci və 2-ci sərbəst işlər toplanır).
+  - Məşğələ balı 10 üzərindən daxil edilir və 1.2 ilə vurularaq 12 bala çevrilir.
+  - Davamiyyət balı maksimum 10 baldır. Qayıb sayı dərs saatının müəyyən faizini keçərsə, bal azaldılır.
+  - Ümumi bal kollekvium, sərbəst işlər, məşğələ və davamiyyət ballarının cəmi olur.
+  - Qayıb sayının icazə verilən həddən çox olması imtahana buraxılmamağa səbəb olur.
+
+- **Laboratoriya fənni üçün bal hesablanması:**
+
+  - Kollekviumların ortalaması 18 baldır.
+  - Sərbəst işlər maksimum 10 baldır.
+  - Laboratoriya işlərinin sayı və təhvil verilən işlərin nisbəti əsasında maksimum 12 bal hesablanır.
+  - Davamiyyət balı və qayıb limiti məşğələ fənnindəki kimi hesablanır.
+  - Ümumi bal kollekvium, sərbəst işlər, laboratoriya və davamiyyət ballarının cəmi olur.
+
+- **Qayıb limiti:**
+
+  - Fənnin dərs saatına görə müəyyən olunur: icazə verilən maksimum qayıb = (Dərs saatı // 4) // 2
+  - Bu limitdən çox qayıb varsa, imtahana buraxılmırsınız.
+
+- **Bal hesablamasında maksimum ballar:**
+
+  | Bal növü           | Maksimum bal |
+  |--------------------|--------------|
+  | Kollekvium         | 18           |
+  | Sərbəst işlər      | 10           |
+  | Məşğələ/Laboratoriya| 12           |
+  | Davamiyyət         | 10           |
+  | **Ümumi maksimum** | **50**       |
+
+- **Nəzərə alınması vacib olanlar:**
+
+  - Hər bir bal sahəsinin maksimum qiymətləri dəyişdirilə bilər, bu proqramda standart qaydalara uyğun olaraq tətbiq olunur.
+  - Hesablamalarda balın düzgün çıxması üçün bütün girişlər maksimum hədlərdə daxil edilməlidir.
+  - İmtahan öncəsi bu bal sistemi ilə hazırlaşma və nəticələrin hesablanması mümkündür.
 
 ---
 
