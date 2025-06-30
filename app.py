@@ -117,24 +117,25 @@ if st.session_state.page == "home":
             st.session_state.page = "help"
             st.rerun()
     
-else:
-    if st.session_state.page != "home":
-        st.sidebar.title("⚙️ Menyu")
-        if st.sidebar.button("🏠 Ana Səhifə"):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.session_state.page = "home"
-            st.rerun()
+menu = st.sidebar.radio(
+    "🔁 Rejimi dəyiş:",
+    ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı", "🧮 Bal Hesablaması", "ℹ️ İstifadə Qaydaları"],
+    index=["exam", "shuffle", "ticket", "score_calc", "help"].index(st.session_state.page),
+    key="menu_radio"
+)
 
-        menu = st.sidebar.radio("🔁 Rejimi dəyiş:", ["📝 Özünü İmtahan Et", "🎲 Sualları Qarışdır", "🎫 Bilet İmtahanı", "🧮 Bal Hesablaması", "ℹ️ İstifadə Qaydaları"],
-                                index=["exam", "shuffle", "ticket", "score_calc", "help"].index(st.session_state.page))
-        st.session_state.page = {
-            "📝 Özünü İmtahan Et": "exam",
-            "🎲 Sualları Qarışdır": "shuffle",
-            "🎫 Bilet İmtahanı": "ticket",
-            "🧮 Bal Hesablaması": "score_calc",
-            "ℹ️ İstifadə Qaydaları": "help"
-        }[menu]
+selected_page = {
+    "📝 Özünü İmtahan Et": "exam",
+    "🎲 Sualları Qarışdır": "shuffle",
+    "🎫 Bilet İmtahanı": "ticket",
+    "🧮 Bal Hesablaması": "score_calc",
+    "ℹ️ İstifadə Qaydaları": "help"
+}[menu]
+
+if selected_page != st.session_state.page:
+    st.session_state.page = selected_page
+    st.rerun()
+
 
 if st.session_state.page == "exam":
     st.title("📝 Özünü Sına: İmtahan Rejimi ")
